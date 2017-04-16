@@ -1,0 +1,9 @@
+{
+  "rootPath:": "./test/",
+  "remotes": [
+    {
+      "name": "local",
+      "url": "localhost"
+    }
+  ]
+}

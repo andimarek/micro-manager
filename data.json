@@ -3,10 +3,5 @@
     {
       "url": "https://github.com/andimarek/example-service.git"
     }
-  ],
-  "remotes": [
-    {
-      "url": "localhost"
-    }
   ]
 }

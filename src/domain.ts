@@ -31,6 +31,12 @@ export interface Task {
 
 export interface Config {
   rootPath: string;
+  remotes: RemoteManager[];
+}
+
+export interface RemoteManager {
+  name: string;
+  url: string;
 }
 
 interface Data {
@@ -45,10 +51,7 @@ interface Data {
 
 const fs = require('fs');
 const data = JSON.parse(fs.readFileSync('./data.json', 'utf8'));
-
-const config: Config = {
-  rootPath: './test/'
-};
+const config: Config = JSON.parse(fs.readFileSync('./config.json'));
 
 /**
  * 
