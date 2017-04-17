@@ -7,6 +7,7 @@ import { serve, Server, connect, Client } from './ipc/ipc';
 
 const DEFAULT_PORT = 8220;
 const PUSH_COMMAND = 'PUSH_COMMAND';
+const PULL_COMMAND = 'PUSH_COMMAND';
 const ENCODING = 'utf-8';
 const DEFAULT_CHANNEL = 'DEFAULT_CHANNEL';
 
@@ -18,6 +19,8 @@ export function openServer() {
       switch (command) {
         case PUSH_COMMAND:
           return Promise.resolve(handlePush(<Data>arg));
+        case PULL_COMMAND:
+          return Promise.resolve(handlePull());
         default:
           return Promise.resolve(false);
       }
@@ -67,64 +70,52 @@ function handlePush(otherData: Data): boolean {
   }
 }
 
+function handlePull(): Data {
+  log('received pull command: sending data to client');
+  return getData();
+}
+
 
 export function push(host: string) {
   log(`pushing data with ${host}`);
-
-  connect(DEFAULT_PORT).then((client: Client) => {
-    const channel = client.getChannel(DEFAULT_CHANNEL);
-    const data = getData();
-    channel.call(PUSH_COMMAND, data).then((result) => {
-      log('result of push:', result);
+  connect(DEFAULT_PORT)
+    .then((client: Client): Promise<boolean> => {
+      const channel = client.getChannel(DEFAULT_CHANNEL);
+      const data = getData();
+      const callResult = channel.call(PUSH_COMMAND, data);
+      callResult.then(() => client.dispose(), () => client.dispose());
+      return callResult;
+    })
+    .then((result:boolean) => {
+      if (result) {
+        log.success('push successful');
+      } else {
+        log.error('push failed');
+      }
     });
-  });
-  // client.connect(DEFAULT_PORT, host, function () {
-  //   log(`connected to ${host}`);
-  //   client.write(PUSH_COMMAND, ENCODING);
-  //   log('sending data', JSON.stringify(getData()));
-  //   client.write(JSON.stringify(getData()));
-  // });
+}
 
-  // client.on('data', function (data) {
-  //   console.log('Received on client', + data);
-  //   client.destroy();
-  // });
-
-  // client.on('close', function () {
-  //   log('Connection closed');
-  // });
-
+export function pull(host: string) {
+  log(`pulling data from ${host}`);
+  connect(DEFAULT_PORT)
+    .then((client: Client): Promise<Data> => {
+      const channel = client.getChannel(DEFAULT_CHANNEL);
+      const data = getData();
+      const callResult = channel.call(PULL_COMMAND, data);
+      callResult.then(() => client.dispose(), () => client.dispose());
+      return callResult;
+    })
+    .then((otherData:Data) => {
+      log('result of pull:', otherData);
+      const mergedData = mergeData(otherData);
+      if (mergedData) {
+        log.success('merged data after pull', mergedData);
+        setData(mergedData);
+      } else {
+        log.error('pull failed: could not merge data');
+      }
+    });
 }
 
 
 
-
-// export function getDelayedChannel<T extends IChannel>(promise: Promise<IChannel>): T {
-//   const call = (command, arg) => promise.then(c => c.call(command, arg));
-//   return { call } as T;
-// }
-
-// export function eventToCall(event: Event<any>): Promise<any> {
-//   let disposable: IDisposable;
-
-//   return new Promise<any>(
-//     (c, e) => disposable = event(p),
-//   );
-// }
-
-// export function eventFromCall<T>(channel: IChannel, name: string): Event<T> {
-//   let promise: Promise<any>;
-
-//   const emitter = new EventEmitter();
-//   // ({
-//   //   onFirstListenerAdd: () => {
-//   //     promise = channel.call(name, null).then(null, err => null, e => emitter.fire(e));
-//   //   },
-//   //   onLastListenerRemove: () => {
-//   //     promise.cancel();
-//   //     promise = null;
-//   //   }
-//   // });
-
-//   return emitter.event;
-// }
