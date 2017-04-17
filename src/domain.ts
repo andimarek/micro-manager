@@ -1,3 +1,5 @@
+import { find } from 'lodash';
+import { log } from './log';
 
 export interface Repository {
   type: RepositoryType;
@@ -39,7 +41,7 @@ export interface RemoteManager {
   url: string;
 }
 
-interface Data {
+export interface Data {
   repos: Repository[];
 }
 
@@ -50,7 +52,7 @@ interface Data {
  */
 
 const fs = require('fs');
-const data = JSON.parse(fs.readFileSync('./data.json', 'utf8'));
+let data = JSON.parse(fs.readFileSync('./data.json', 'utf8'));
 const config: Config = JSON.parse(fs.readFileSync('./config.json'));
 
 /**
@@ -59,6 +61,46 @@ const config: Config = JSON.parse(fs.readFileSync('./config.json'));
 
 export function getRepos(): Repository[] {
   return data.repos;
+}
+export function setData(_data: Data) {
+  log(`setting new data`, data);
+  data = _data;
+}
+export function getData(): Data {
+  return data;
+}
+
+export function mergeData(otherData: Data): Data | null {
+  const newRepos = mergeRepos(otherData.repos, data.repos);
+  if (!newRepos) {
+    return null;
+  }
+  const result: Data = {
+    repos: newRepos
+  }
+  return result;
+}
+
+
+function mergeRepos(repos1: Repository[], repos2: Repository[]): Repository[] | null {
+  const result: Repository[] = repos1.slice();
+  for (const repo of repos2) {
+    const otherRepo = find(repos1, ['url', repo.url]);
+    if (!otherRepo) {
+      result.push(repo);
+    } else {
+      if (!areReposEqual(repo, otherRepo)) {
+        log.error(`cant merge repos. different repos:`, repo, otherRepo);
+        return null;
+      }
+    }
+  }
+  return result;
+}
+
+function areReposEqual(repo1: Repository, repo2: Repository): boolean {
+  return repo1.url === repo2.url &&
+    repo2.type === repo2.type;
 }
 
 export function getConfig(): Config {

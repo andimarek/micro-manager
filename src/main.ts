@@ -8,8 +8,13 @@ import checkout from './commands/checkout';
 import push from './commands/push';
 import config from './commands/config';
 
-process.on('uncaughtException', (error) => {
-  console.error(`uncaught exception ${error} ... exiting now`);
+process.on('uncaughtException', (exception) => {
+  log.error(`uncaught exception ${exception} ... exiting now`);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, p) => {
+  log.error('unhandled promise rejection...exiting now', reason);
   process.exit(1);
 });
 

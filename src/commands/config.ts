@@ -1,7 +1,7 @@
 import {Command} from '../inputreader';
 import {getConfig, Config} from '../domain';
 import {find} from 'lodash';
-import {log, error} from '../log';
+import {log } from '../log';
 
 const command: Command = {
   name: 'config',
@@ -14,7 +14,7 @@ const command: Command = {
 
 function run(args: string[]) {
   const config = getConfig();
-  console.log('current config:\n', config);
+  log('current config:\n', config);
 }
 
 export default command;
