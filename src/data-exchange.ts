@@ -7,7 +7,7 @@ import { serve, Server, connect, Client } from './ipc/ipc';
 
 const DEFAULT_PORT = 8220;
 const PUSH_COMMAND = 'PUSH_COMMAND';
-const PULL_COMMAND = 'PUSH_COMMAND';
+const PULL_COMMAND = 'PULL_COMMAND';
 const ENCODING = 'utf-8';
 const DEFAULT_CHANNEL = 'DEFAULT_CHANNEL';
 
@@ -109,8 +109,8 @@ export function pull(host: string) {
       log('result of pull:', otherData);
       const mergedData = mergeData(otherData);
       if (mergedData) {
-        log.success('merged data after pull', mergedData);
         setData(mergedData);
+        log.success('pull successful. new data after pull', mergedData);
       } else {
         log.error('pull failed: could not merge data');
       }

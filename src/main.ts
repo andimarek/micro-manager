@@ -6,6 +6,7 @@ import { log } from './log';
 
 import checkout from './commands/checkout';
 import push from './commands/push';
+import pull from './commands/pull';
 import config from './commands/config';
 
 process.on('uncaughtException', (exception) => {
@@ -31,6 +32,7 @@ openServer();
 const commands: Command[] = [
   checkout,
   push,
+  pull,
   config
 ];
 
