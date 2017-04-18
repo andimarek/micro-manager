@@ -8,7 +8,7 @@ import push from './commands/push';
 import pull from './commands/pull';
 import config from './commands/config';
 
-import {isClean} from './checkout';
+import {checkoutIntoTmp} from './checkout';
 
 process.on('uncaughtException', (exception) => {
   log.error(`uncaught exception ${exception} ... exiting now`);
@@ -32,7 +32,4 @@ const commands: Command[] = [
 
 setCommands(commands);
 
-isClean('../node').then((clean) => {
-  log('isclean',clean);
-});
-
+checkoutIntoTmp(getRepos());

@@ -4,6 +4,11 @@
       "id": "1",
       "url": "https://github.com/andimarek/example-service.git",
       "type": "git"
+    },
+    {
+      "id": "2",
+      "url": "https://github.com/andimarek/ShortestEditPath",
+      "type": "git"
     }
   ],
   "projects": [

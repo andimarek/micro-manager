@@ -1,6 +1,20 @@
 import { Repository, Config } from './domain';
-import { spawn, exec, execFile } from 'child_process';
+import { exec, execFile } from 'child_process';
 import { log } from './log';
+import { newTmpDir } from './util';
+
+export function checkoutIntoTmp(repos: Repository[]): Promise<void> {
+  const tmpDir = newTmpDir();
+  const promises: Promise<string>[] = [];
+  log(`tmpDir: ${tmpDir}`);
+  for (const repo of repos) {
+    log(`checking out ${repo.url}`);
+    promises.push(gitClone(repo.url, tmpDir));
+  }
+  return Promise.all(promises).then(() => { 
+    log.success('checked out all repos') 
+  });
+}
 
 export function checkout(repos: Repository[], config: Config) {
   for (const repo of repos) {
@@ -9,16 +23,16 @@ export function checkout(repos: Repository[], config: Config) {
   }
 }
 
-function gitClone(url: string, path: string): Promise<void> {
-  return executeCommand('git', ['clone', '--progress', url], path ).then( () => {});
+function gitClone(url: string, path: string): Promise<string> {
+  return executeCommand('git', ['clone', '--progress', url], path);
 }
 
 function gitStatus(path: string): void {
-  const gitStatus = spawn('git', ['status'], { cwd: path });
+  const gitStatus = executeCommand('git', ['status'], path );
 }
 
 function gitPull(path: string): void {
-  const gitPull = spawn('git', ['pull', 'origin']);
+  const gitPull = executeCommand('git', ['pull', 'origin'], path);
 }
 
 
@@ -46,7 +60,7 @@ export function isClean(path: string): Promise<boolean> {
 
 function executeCommand(command: string, args: string[], path: string): Promise<string> {
   const result = new Promise((resolve, reject) => {
-    execFile(command, args, {cwd: path}, (error, stdout, stderr) => {
+    execFile(command, args, { cwd: path }, (error, stdout, stderr) => {
       if (error) {
         reject(error);
         return;
