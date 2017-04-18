@@ -1,5 +1,5 @@
 {
-  "rootPath:": "./test/",
+  "rootPath:": "~/dev/projects",
   "remotes": [
     {
       "name": "local",

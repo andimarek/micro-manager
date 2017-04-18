@@ -1,5 +1,5 @@
 import { setCommands, Command } from './inputreader';
-import { getRepos, Repository, getConfig } from './domain';
+import { init, getRepos, Repository, getConfig } from './domain';
 import { openServer } from './data-exchange';
 import { log } from './log';
 
@@ -21,7 +21,6 @@ process.on('unhandledRejection', (reason, p) => {
 });
 
 log('starting mm');
-openServer();
 
 const commands: Command[] = [
   checkout,
@@ -29,7 +28,12 @@ const commands: Command[] = [
   pull,
   config
 ];
-
 setCommands(commands);
 
-checkoutIntoTmp(getRepos());
+init().then( () => {
+  openServer();
+});
+
+
+
+// checkoutIntoTmp(getRepos());

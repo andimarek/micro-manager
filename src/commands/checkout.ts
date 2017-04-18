@@ -18,7 +18,7 @@ function checkout() {
   const config = getConfig();
   for (const repo of repos) {
     console.log(`checking out ${repo.url}`);
-    gitClone(repo.url, config.rootPath);
+    gitClone(repo.url, config.rootPath!);
   }
 }
 

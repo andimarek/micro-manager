@@ -19,7 +19,7 @@ export function checkoutIntoTmp(repos: Repository[]): Promise<void> {
 export function checkout(repos: Repository[], config: Config) {
   for (const repo of repos) {
     console.log(`checking out ${repo.url}`);
-    gitClone(repo.url, config.rootPath);
+    gitClone(repo.url, config.rootPath!);
   }
 }
 
