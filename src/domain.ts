@@ -1,6 +1,7 @@
 import { find } from 'lodash';
 import { log } from './log';
 import * as fs from 'fs';
+import {ensureDirExists} from './util';
 
 export interface Repository {
   id: string;
@@ -70,20 +71,20 @@ let config: Config;
  * 
  */
 
-export function init(): Promise<void> {
-  const dir = `${process.env.HOME}/.mm`;
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-  const dataPath = `${process.env.HOME}/.mm/data.json`;
-  const dataPromise = readFile(dataPath, { repos: [] } as Data).then((content) => {
-    data = <Data>content;
+export function init(): Promise<any> {
+  const baseDir = `${process.env.HOME}/.mm`;
+  const dataPath = `${baseDir}/data.json`;
+  const result = ensureDirExists(baseDir).then( () => {
+    const dataPromise = readFile(dataPath, { repos: [] } as Data).then((content) => {
+      data = <Data>content;
+    });
+    const configPath = `${baseDir}/config.json`;
+    const configPromise = readFile(configPath, { remotes: [] } as Config).then((content) => {
+      config = <Config>content;
+    });
+    return Promise.all([dataPromise, configPromise]).then(() => { });
   });
-  const configPath = `${process.env.HOME}/.mm/config.json`;
-  const configPromise = readFile(configPath, { remotes: [] } as Config).then((content) => {
-    config = <Config>content;
-  });
-  return Promise.all([dataPromise, configPromise]).then(() => { });
+  return result;
 }
 
 function readFile(path: string, defaultContent: object): Promise<object> {
@@ -93,7 +94,7 @@ function readFile(path: string, defaultContent: object): Promise<object> {
         console.log(`no file ${path}`);
         fs.writeFileSync(path, JSON.stringify(defaultContent));
         resolve(defaultContent);
-      } else if (err){
+      } else if (err) {
         console.error(err);
         reject(err);
       }

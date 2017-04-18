@@ -30,6 +30,8 @@ const commands: Command[] = [
 ];
 setCommands(commands);
 
+
+
 init().then( () => {
   openServer();
 });
