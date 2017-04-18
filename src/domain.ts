@@ -2,6 +2,7 @@ import { find } from 'lodash';
 import { log } from './log';
 
 export interface Repository {
+  id: string;
   type: RepositoryType;
   url: string;
 }
@@ -12,15 +13,22 @@ export enum RepositoryType {
 }
 
 export interface Project {
-  repository: Repository;
+  name: string;
+  repositoryId: string;
   path: string;
-  language: ProgrammingLanguage;
+  type: ProjectType;
 }
 
-export enum ProgrammingLanguage {
-  Java,
-  JavaScript
+export enum ProjectType {
+  JavaMaven,
+  JavaGradle,
+  JavaScriptNpm
 }
+
+// export enum ProgrammingLanguage {
+//   Java,
+//   JavaScript
+// }
 
 export interface Product {
   name: string;
