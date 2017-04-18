@@ -71,27 +71,21 @@ let config: Config;
  * 
  */
 
-export function init(): Promise<any> {
+export async function init(): Promise<any> {
   const baseDir = `${process.env.HOME}/.mm`;
   const dataPath = `${baseDir}/data.json`;
-  const result = ensureDirExists(baseDir).then( () => {
-    const dataPromise = readFile(dataPath, { repos: [] } as Data).then((content) => {
-      data = <Data>content;
-    });
-    const configPath = `${baseDir}/config.json`;
-    const configPromise = readFile(configPath, { remotes: [] } as Config).then((content) => {
-      config = <Config>content;
-    });
-    return Promise.all([dataPromise, configPromise]).then(() => { });
-  });
-  return result;
+  await ensureDirExists(baseDir);
+  data = <Data> await readFile(dataPath, { repos: [] } as Data);  
+
+  const configPath = `${baseDir}/config.json`;
+  config = <Config> await readFile(configPath, { remotes: [] } as Config);  
 }
 
 function readFile(path: string, defaultContent: object): Promise<object> {
   const result = new Promise<object>((resolve, reject) => {
     const fd = fs.access(path, fs.constants.R_OK | fs.constants.W_OK, (err) => {
       if (err && err.code === 'ENOENT') {
-        console.log(`no file ${path}`);
+        console.log(`creating new file ${path}`);
         fs.writeFileSync(path, JSON.stringify(defaultContent));
         resolve(defaultContent);
       } else if (err) {
