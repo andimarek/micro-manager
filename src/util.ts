@@ -33,7 +33,6 @@ export function ensureDirExists(path: string): Promise<any> {
       }
       resolve();
     });
-
   }
 
   const result = new Promise<any>((resolve, reject) => {

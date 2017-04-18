@@ -1,5 +1,5 @@
-import { ReadStream } from "tty";
-import {find} from 'lodash';
+import { ReadStream, WriteStream } from "tty";
+import { find } from 'lodash';
 
 export interface InputReader {
   onCancel(): void;
@@ -10,7 +10,7 @@ export interface InputReader {
 export interface Command {
   name: string;
   arguments: CommandArgument[];
-  execute: (args:string[]) => void;
+  execute: (args: string[]) => void;
 }
 export interface CommandArgument {
   name: string;
@@ -21,8 +21,9 @@ const LF = '\n';
 const BACKSPACE = '\u007F'
 const CTRL_C = '\u0003';
 const BS = '\u0008';
+const TAB = '\t';
 
-type Processor = (chunk: string ) => void;
+type Processor = (chunk: string) => void;
 let currentProcessor: Processor = lineProcessor;
 
 let currentLine = '';
@@ -37,9 +38,16 @@ let commands: Command[];
 if (!process.stdin.isTTY) {
   throw new Error('stdin is not TTY');
 }
+
+if (!process.stdout.isTTY) {
+  throw new Error('stdout is not TTY');
+}
+
 const stdin = <ReadStream>process.stdin;
 stdin.setEncoding('utf8');
 stdin.setRawMode(true);
+const stdout = <WriteStream>process.stdout;
+
 
 export function setCommands(_commands: Command[]) {
   commands = _commands;
@@ -51,29 +59,41 @@ function getCommand(name: string): Command | undefined {
 
 function handleLine(line: string) {
   const parts = line.split(" ");
+  if (parts[0] === 'help') {
+    stdout.write('\n');
+    stdout.write('available commands:');
+    stdout.write(LF);
+    commands.forEach(command => {
+      stdout.write(command.name); 
+      stdout.write(LF);
+    });
+    return;
+  }
   const command = getCommand(parts[0]);
   if (command) {
     command.execute(parts.slice(1));
   } else {
-    console.log(`unknown command ${parts[0]}`);
+    console.log(`unknown command ${parts[0]} ... use 'help' to get the available commands`);
   }
 }
 
 function lineProcessor(chunk: string): void {
   if (chunk === CR || chunk == LF) {
-    process.stdout.write('\n');
+    stdout.write('\n');
     handleLine(currentLine);
     currentLine = '';
     curColumn = 1;
   } else if (chunk === BACKSPACE) {
     currentLine = currentLine.substr(0, currentLine.length - 1);
-    // process.stdout.write('\u0011');
+    // stdout.write('\u0011');
     process.stdout.write(`\u001b[${curColumn - 1}G`);
     process.stdout.write('\u001b[K');
     curColumn--;
-    // process.stdout.write('\u007F');
+    // stdout.write('\u007F');
 
-    // process.stdout.write('\t');
+    // stdout.write('\t');
+  } else if (chunk === TAB) {
+    // TODO: Completion
   } else {
     currentLine += chunk;
     curColumn++;
