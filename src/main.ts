@@ -7,6 +7,7 @@ import checkout from './commands/checkout';
 import push from './commands/push';
 import pull from './commands/pull';
 import config from './commands/config';
+import data from './commands/data';
 
 import {checkoutIntoTmp} from './checkout';
 
@@ -26,7 +27,8 @@ const commands: Command[] = [
   checkout,
   push,
   pull,
-  config
+  config,
+  data
 ];
 setCommands(commands);
 

@@ -74,7 +74,7 @@ function handleLine(line: string) {
   if (command) {
     command.execute(parts.slice(1));
   } else {
-    console.log(`unknown command ${parts[0]} ... use 'help' to get the available commands`);
+    console.log(`🤷  unknown command ${parts[0]} ... use 'help' to get the available commands`);
   }
 }
 
