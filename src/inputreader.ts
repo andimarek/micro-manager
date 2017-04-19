@@ -87,9 +87,9 @@ function lineProcessor(chunk: string): void {
   if (chunk === CR || chunk == LF) {
     stdout.write('\n');
     handleLine(currentLine);
-    newLine();
     currentLine = '';
     curColumn = 1;
+    newLine();
   } else if (chunk === BACKSPACE) {
     if (currentLine.length > 0) {
       currentLine = currentLine.substr(0, currentLine.length - 1);

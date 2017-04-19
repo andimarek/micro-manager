@@ -1,7 +1,7 @@
 import { find } from 'lodash';
 import { log } from './log';
 import * as fs from 'fs';
-import {ensureDirExists} from './util';
+import { ensureDirExists, readFile } from './util';
 
 export interface Repository {
   id: string;
@@ -61,8 +61,6 @@ export interface Data {
  * 
  */
 
-// let data = JSON.parse(fs.readFileSync('~/.mm/data.json', 'utf8'));
-// const config: Config = JSON.parse(fs.readFileSync('~/config.json', 'utf-8'));
 
 let data: Data;
 let config: Config;
@@ -75,32 +73,12 @@ export async function init(): Promise<any> {
   const baseDir = `${process.env.HOME}/.mm`;
   const dataPath = `${baseDir}/data.json`;
   await ensureDirExists(baseDir);
-  data = <Data> await readFile(dataPath, { repos: [] } as Data);  
+  data = <Data>await readFile(dataPath, { repos: [] } as Data);
 
   const configPath = `${baseDir}/config.json`;
-  config = <Config> await readFile(configPath, { remotes: [] } as Config);  
+  config = <Config>await readFile(configPath, { remotes: [] } as Config);
 }
 
-function readFile(path: string, defaultContent: object): Promise<object> {
-  const result = new Promise<object>((resolve, reject) => {
-    const fd = fs.access(path, fs.constants.R_OK | fs.constants.W_OK, (err) => {
-      if (err && err.code === 'ENOENT') {
-        console.log(`creating new file ${path}`);
-        fs.writeFileSync(path, JSON.stringify(defaultContent));
-        resolve(defaultContent);
-      } else if (err) {
-        console.error(err);
-        reject(err);
-      }
-      const content = JSON.parse(fs.readFileSync(path, 'utf8'));
-      resolve(content);
-    });
-  });
-  return result;
-
-}
-// const dataFile = (<any>fs.readFileSync)(fd, 'utf-8');
-// const dataFile = fs.accessSync('~/.mm/data.json',fs.constants.O_RDWR | fs.constants.S_IFREG);
 
 export function getRepos(): Repository[] {
   return data.repos;

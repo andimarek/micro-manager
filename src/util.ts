@@ -46,3 +46,21 @@ export function ensureDirExists(path: string): Promise<any> {
   });
   return result;
 }
+
+export function readFile(path: string, defaultContent: object): Promise<object> {
+  const result = new Promise<object>((resolve, reject) => {
+    const fd = fs.access(path, fs.constants.R_OK | fs.constants.W_OK, (err) => {
+      if (err && err.code === 'ENOENT') {
+        console.log(`creating new file ${path}`);
+        fs.writeFileSync(path, JSON.stringify(defaultContent));
+        resolve(defaultContent);
+      } else if (err) {
+        console.error(err);
+        reject(err);
+      }
+      const content = JSON.parse(fs.readFileSync(path, 'utf8'));
+      resolve(content);
+    });
+  });
+  return result;
+}
