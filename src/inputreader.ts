@@ -1,5 +1,6 @@
 import { ReadStream, WriteStream } from "tty";
 import { find } from 'lodash';
+import { blue } from 'chalk';
 
 export interface InputReader {
   onCancel(): void;
@@ -64,7 +65,7 @@ function handleLine(line: string) {
     stdout.write('available commands:');
     stdout.write(LF);
     commands.forEach(command => {
-      stdout.write(command.name); 
+      stdout.write(command.name);
       stdout.write(LF);
     });
     return;
@@ -77,21 +78,25 @@ function handleLine(line: string) {
   }
 }
 
+function newLine() {
+  stdout.write(blue('>'));
+  curColumn++;
+}
+
 function lineProcessor(chunk: string): void {
   if (chunk === CR || chunk == LF) {
     stdout.write('\n');
     handleLine(currentLine);
+    newLine();
     currentLine = '';
     curColumn = 1;
   } else if (chunk === BACKSPACE) {
-    currentLine = currentLine.substr(0, currentLine.length - 1);
-    // stdout.write('\u0011');
-    process.stdout.write(`\u001b[${curColumn - 1}G`);
-    process.stdout.write('\u001b[K');
-    curColumn--;
-    // stdout.write('\u007F');
-
-    // stdout.write('\t');
+    if (currentLine.length > 0) {
+      currentLine = currentLine.substr(0, currentLine.length - 1);
+      process.stdout.write(`\u001b[${curColumn - 1}G`);
+      process.stdout.write('\u001b[K');
+      curColumn--;
+    }
   } else if (chunk === TAB) {
     // TODO: Completion
   } else {
@@ -99,9 +104,7 @@ function lineProcessor(chunk: string): void {
     curColumn++;
     process.stdout.write(chunk);
   }
-
   // console.log('1:', encodeURI(chunk));
-
   if (chunk === CTRL_C) {
     // reader.onCancel();
     process.exit(0);
@@ -109,14 +112,9 @@ function lineProcessor(chunk: string): void {
 
 }
 
-
-stdin.on('data', (chunk: string) => {
-  currentProcessor(chunk);
-});
-
-// export function readInput(reader: InputReader) {
-
-// }
-
-// export function readOptions(values: string[]) {
-// }
+export function start() {
+  newLine();
+  stdin.on('data', (chunk: string) => {
+    currentProcessor(chunk);
+  });
+}

@@ -1,4 +1,4 @@
-import { setCommands, Command } from './inputreader';
+import { setCommands, Command, start as startReadingInput } from './inputreader';
 import { init, getRepos, Repository, getConfig } from './domain';
 import { openServer } from './data-exchange';
 import { log } from './log';
@@ -30,10 +30,9 @@ const commands: Command[] = [
 ];
 setCommands(commands);
 
-
-
 init().then( () => {
   openServer();
+  startReadingInput();
 });
 
 
