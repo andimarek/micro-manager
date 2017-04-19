@@ -16,7 +16,7 @@
       "id": "1",
       "name": "example-service",
       "type": "java-maven",
-      "repository": "1",
+      "repositoryId": "1",
       "path": "/"
     }
   ],

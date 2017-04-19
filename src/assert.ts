@@ -6,6 +6,12 @@ export function assertDefined(value: any, message?: string) {
   }
 }
 
+export function assertTrue(value:any, message?: string) {
+  if(value !== true) {
+    throw new Error(message ? message : 'should be defined');
+  }
+}
+
 // export function checkToBe(actualValue: any, expetedValue: any, message: string): void {
 //   if (actualValue !== expetedValue) {
 //     throw new Error(message);
