@@ -3,6 +3,7 @@ import { log } from './log';
 import * as fs from 'fs';
 import { ensureDirExists, readFile } from './util';
 import { assertDefined, assertTrue } from './assert';
+import {ensureGitRepo, ensureFileIsCommited} from './git';
 
 export interface Repository {
   id: string;
@@ -72,12 +73,15 @@ let config: Config;
  */
 
 export async function init(): Promise<any> {
-  const baseDir = `${process.env.HOME}/.mm`;
-  const dataPath = `${baseDir}/data.json`;
+  const baseDir = `${process.env.HOME}/.micro-manager`;
+  const dataDir = `${baseDir}/data`;
+  const dataFile = `${dataDir}/data.json`;
+
   await ensureDirExists(baseDir);
-  await ensureDirExists(`${baseDir}/data/`)
-  data = <Data>await readFile(dataPath, { repos: [] } as Data);
-  // validateData();
+  await ensureDirExists(dataDir)
+  await ensureGitRepo(dataDir);
+  await ensureFileIsCommited(dataDir, 'data.json');
+  data = <Data>await readFile(dataFile, { repos: [] } as Data);
 
   const configPath = `${baseDir}/config.json`;
   config = <Config>await readFile(configPath, { remotes: [] } as Config);

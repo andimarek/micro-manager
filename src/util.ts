@@ -1,8 +1,22 @@
 import { dirSync } from 'tmp';
+import { exec, execFile } from 'child_process';
 import * as fs from 'fs';
 
 export function newTmpDir(): string {
   return dirSync().name;
+}
+
+export function executeCommand(command: string, args: string[], path: string): Promise<string> {
+  const result = new Promise((resolve, reject) => {
+    execFile(command, args, { cwd: path }, (error, stdout, stderr) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(stdout);
+    });
+  });
+  return result;
 }
 
 export function ensureDirExists(path: string): Promise<any> {

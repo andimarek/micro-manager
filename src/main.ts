@@ -8,8 +8,10 @@ import push from './commands/push';
 import pull from './commands/pull';
 import config from './commands/config';
 import data from './commands/data';
+import exit from './commands/exit';
 
-import {checkoutIntoTmp} from './checkout';
+import {ensureGitRepo} from './git';
+
 
 process.on('uncaughtException', (exception) => {
   log.error(`uncaught exception ${exception} ... exiting now`);
@@ -23,12 +25,15 @@ process.on('unhandledRejection', (reason, p) => {
 
 log('starting mm');
 
+ensureGitRepo('/tmp/test');
+
 const commands: Command[] = [
   checkout,
   push,
   pull,
   config,
-  data
+  data,
+  exit
 ];
 setCommands(commands);
 
@@ -36,7 +41,3 @@ init().then( () => {
   openServer();
   startReadingInput();
 });
-
-
-
-// checkoutIntoTmp(getRepos());
