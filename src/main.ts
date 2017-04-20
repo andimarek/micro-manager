@@ -25,8 +25,6 @@ process.on('unhandledRejection', (reason, p) => {
 
 log('starting mm');
 
-ensureGitRepo('/tmp/test');
-
 const commands: Command[] = [
   checkout,
   push,
