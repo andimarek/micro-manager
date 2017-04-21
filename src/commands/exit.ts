@@ -8,13 +8,14 @@ const command: Command = {
   arguments: [
   ],
   execute(args: string[]) {
-    run(args);
+   return run(args);
   }
 };
 
 function run(args: string[]) {
   log('👋  Goodbye');
   process.exit(0);
+  return Promise.resolve();
 }
 
 export default command;

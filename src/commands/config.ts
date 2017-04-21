@@ -8,13 +8,14 @@ const command: Command = {
   arguments: [
   ],
   execute(args: string[]) {
-    run(args);
+    return run(args);
   }
 };
 
-function run(args: string[]) {
+function run(args: string[]): Promise<void> {
   const config = getConfig();
   log('current config:\n', config);
+  return Promise.resolve();
 }
 
 export default command;

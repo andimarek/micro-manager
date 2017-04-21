@@ -11,7 +11,7 @@ export interface InputReader {
 export interface Command {
   name: string;
   arguments: CommandArgument[];
-  execute: (args: string[]) => void;
+  execute: (args: string[]) => Promise<void>;
 }
 export interface CommandArgument {
   name: string;
@@ -58,23 +58,28 @@ function getCommand(name: string): Command | undefined {
   return find(commands, (command) => command.name === name);
 }
 
-function handleLine(line: string) {
+function printHelp() {
+  stdout.write('\n');
+  stdout.write('available commands:');
+  stdout.write(LF);
+  commands.forEach(command => {
+    stdout.write(command.name);
+    stdout.write(LF);
+  });
+}
+
+function handleLine(line: string): Promise<any> {
   const parts = line.split(" ");
   if (parts[0] === 'help') {
-    stdout.write('\n');
-    stdout.write('available commands:');
-    stdout.write(LF);
-    commands.forEach(command => {
-      stdout.write(command.name);
-      stdout.write(LF);
-    });
-    return;
+    printHelp();
+    return Promise.resolve();
   }
   const command = getCommand(parts[0]);
   if (command) {
-    command.execute(parts.slice(1));
+    return command.execute(parts.slice(1));
   } else {
     console.log(`🤷  unknown command ${parts[0]} ... use 'help' to get the available commands`);
+    return Promise.resolve();
   }
 }
 
@@ -86,10 +91,11 @@ function newLine() {
 function lineProcessor(chunk: string): void {
   if (chunk === CR || chunk == LF) {
     stdout.write('\n');
-    handleLine(currentLine);
-    currentLine = '';
-    curColumn = 1;
-    newLine();
+    handleLine(currentLine).then(() => {
+      currentLine = '';
+      curColumn = 1;
+      newLine();
+    });
   } else if (chunk === BACKSPACE) {
     if (currentLine.length > 0) {
       currentLine = currentLine.substr(0, currentLine.length - 1);

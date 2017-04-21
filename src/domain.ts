@@ -88,14 +88,14 @@ export async function init(): Promise<any> {
   config = <Config>await readFile(configPath, { remotes: [] } as Config);
 }
 
-function validateData() {
-  for (const repo of data.repos) {
-    assertDefined(repo.id, `repo is invalid. id is missing ${repo}`)
-    assertDefined(repo.url, `repo is invalid. url is missing ${repo}`)
-    assertDefined(repo.type, `repo is invalid. type is missing ${repo}`)
-  }
-  assertTrue(checkForUniqueIds(data.repos));
-}
+  // function validateData() {
+  //   for (const repo of data.repos) {
+  //     assertDefined(repo.id, `repo is invalid. id is missing ${repo}`)
+  //     assertDefined(repo.url, `repo is invalid. url is missing ${repo}`)
+  //     assertDefined(repo.type, `repo is invalid. type is missing ${repo}`)
+  //   }
+  //   assertTrue(checkForUniqueIds(data.repos));
+  // }
 
 function checkForUniqueIds(array: { id: string }[]): boolean {
   return uniqBy(array, 'id').length !== array.length;

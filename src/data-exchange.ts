@@ -57,9 +57,9 @@ function handlePull(): Data {
 }
 
 
-export function push(host: string) {
+export function push(host: string): Promise<any> {
   log.debug(`pushing data with ${host}`);
-  connect(DEFAULT_PORT)
+  return connect(DEFAULT_PORT)
     .then((client: Client): Promise<boolean> => {
       const channel = client.getChannel(DEFAULT_CHANNEL);
       const data = getData();
@@ -73,17 +73,18 @@ export function push(host: string) {
       } else {
         log.error('push failed');
       }
+      return result;
     });
 }
 
-export function pull(host: string) {
+export function pull(host: string): Promise<any> {
   log.debug(`pulling data from ${host}`);
-  connect(DEFAULT_PORT)
+  return connect(DEFAULT_PORT)
     .then((client: Client): Promise<Data> => {
       const channel = client.getChannel(DEFAULT_CHANNEL);
       const data = getData();
       const callResult = channel.call(PULL_COMMAND, data);
-      callResult.then(() => client.dispose(), () => client.dispose());
+      callResult.then(client.dispose, client.dispose);
       return callResult;
     })
     .then((otherData:Data) => {

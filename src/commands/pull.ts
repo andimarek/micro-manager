@@ -10,7 +10,7 @@ const command: Command = {
     { name: 'remoteName' }
   ],
   execute(args: string[]) {
-    execute(args);
+    return execute(args);
   }
 };
 
@@ -21,8 +21,9 @@ function execute(args: string[]) {
   const remoteManager = find(config.remotes, (remote) => remote.name === remoteName);
   if (!remoteManager) {
     log.error(`invalid remote manager: ${remoteName}`);
+    return Promise.reject(`invalid remote manager: ${remoteName}`);
   } else {
-    pull(remoteManager.url);
+    return pull(remoteManager.url);
   }
 }
 
