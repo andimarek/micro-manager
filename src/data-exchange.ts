@@ -11,7 +11,7 @@ const PULL_COMMAND = 'PULL_COMMAND';
 const ENCODING = 'utf-8';
 const DEFAULT_CHANNEL = 'DEFAULT_CHANNEL';
 
-export function openServer() {
+export function openServer(): Promise<any> {
   log(`opening server at port ${DEFAULT_PORT}`);
   const channel = {
     call(command: string, arg: any): Promise<any> {
@@ -26,7 +26,7 @@ export function openServer() {
       }
     }
   };
-  serve(DEFAULT_PORT)
+  return serve(DEFAULT_PORT)
     .then((server: Server) => {
       server.registerChannel(DEFAULT_CHANNEL, channel);
     })
@@ -38,25 +38,6 @@ export function openServer() {
         process.exit(1);
       }
     });
-  // const server = net.createServer((socket: net.Socket) => {
-  //   console.log('new client connection');
-  //   socket.setEncoding(ENCODING);
-  //   socket.on('data', (command: string) => {
-  //     console.log('command received:', command);
-  //     switch (command) {
-  //       case PUSH_COMMAND:
-  //         receiveData(socket);
-  //     }
-  //   });
-  // });
-
-  // server.on('error', (e: any) => {
-  //   if (e.code == 'EADDRINUSE') {
-  //     log('Address is already in use...no server is started');
-  //   }
-  // });
-  // log(`opening server on port ${DEFAULT_PORT}`);
-  // server.listen(DEFAULT_PORT);
 }
 
 function handlePush(otherData: Data): boolean {
@@ -71,13 +52,13 @@ function handlePush(otherData: Data): boolean {
 }
 
 function handlePull(): Data {
-  log('received pull command: sending data to client');
+  log.debug('received pull command: sending data to client');
   return getData();
 }
 
 
 export function push(host: string) {
-  log(`pushing data with ${host}`);
+  log.debug(`pushing data with ${host}`);
   connect(DEFAULT_PORT)
     .then((client: Client): Promise<boolean> => {
       const channel = client.getChannel(DEFAULT_CHANNEL);
@@ -96,7 +77,7 @@ export function push(host: string) {
 }
 
 export function pull(host: string) {
-  log(`pulling data from ${host}`);
+  log.debug(`pulling data from ${host}`);
   connect(DEFAULT_PORT)
     .then((client: Client): Promise<Data> => {
       const channel = client.getChannel(DEFAULT_CHANNEL);

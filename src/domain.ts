@@ -81,7 +81,6 @@ export async function init(): Promise<any> {
   await ensureDirExists(dataDir)
 
   data = <Data>await readFile(dataFile, { repos: [] } as Data);
-
   await ensureGitRepo(dataDir);
   await ensureFileIsCommited(dataDir, 'data.json');
 
@@ -107,7 +106,7 @@ export function getRepos(): Repository[] {
   return data.repos;
 }
 export function setData(_data: Data) {
-  log(`setting new data`, data);
+  log.debug(`setting new data`, data);
   data = _data;
 }
 export function getData(): Data {

@@ -10,7 +10,7 @@ import config from './commands/config';
 import data from './commands/data';
 import exit from './commands/exit';
 
-import {ensureGitRepo} from './git';
+import { ensureGitRepo } from './git';
 
 
 process.on('uncaughtException', (exception) => {
@@ -35,7 +35,6 @@ const commands: Command[] = [
 ];
 setCommands(commands);
 
-init().then( () => {
-  openServer();
-  startReadingInput();
-});
+init()
+  .then(openServer)
+  .then(startReadingInput);
