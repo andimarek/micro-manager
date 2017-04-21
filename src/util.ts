@@ -1,9 +1,28 @@
 import { dirSync } from 'tmp';
-import { exec, execFile } from 'child_process';
+import { exec, execFile, execSync } from 'child_process';
 import * as fs from 'fs';
+import { assertTrue } from './assert';
+
+export function sleep(seconds: number): void {
+  execSync(`sleep ${seconds}`);
+}
 
 export function newTmpDir(): string {
   return dirSync().name;
+}
+
+export function fileExists(path: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    fs.exists(path, (exists) => {
+      resolve(exists);
+    });
+  });
+}
+
+export function assertFileExists(path: string): Promise<void> {
+  return fileExists(path).then((exists) => {
+    assertTrue(exists, `file ${path} doesn't exist`);
+  });
 }
 
 export function executeCommand(command: string, args: string[], path: string): Promise<string> {
@@ -65,7 +84,6 @@ export function readFile(path: string, defaultContent: object): Promise<object> 
   const result = new Promise<object>((resolve, reject) => {
     const fd = fs.access(path, fs.constants.R_OK | fs.constants.W_OK, (err) => {
       if (err && err.code === 'ENOENT') {
-        console.log(`creating new file ${path}`);
         fs.writeFileSync(path, JSON.stringify(defaultContent));
         resolve(defaultContent);
       } else if (err) {

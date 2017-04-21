@@ -8,7 +8,7 @@ export function assertDefined(value: any, message?: string) {
 
 export function assertTrue(value:any, message?: string) {
   if(value !== true) {
-    throw new Error(message ? message : 'should be defined');
+    throw new Error(message ? message : 'should be true');
   }
 }
 

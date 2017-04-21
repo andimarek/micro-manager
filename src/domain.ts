@@ -1,7 +1,7 @@
 import { find, uniqBy } from 'lodash';
 import { log } from './log';
 import * as fs from 'fs';
-import { ensureDirExists, readFile } from './util';
+import { ensureDirExists, readFile, sleep } from './util';
 import { assertDefined, assertTrue } from './assert';
 import {ensureGitRepo, ensureFileIsCommited} from './git';
 
@@ -79,9 +79,11 @@ export async function init(): Promise<any> {
 
   await ensureDirExists(baseDir);
   await ensureDirExists(dataDir)
+
+  data = <Data>await readFile(dataFile, { repos: [] } as Data);
+
   await ensureGitRepo(dataDir);
   await ensureFileIsCommited(dataDir, 'data.json');
-  data = <Data>await readFile(dataFile, { repos: [] } as Data);
 
   const configPath = `${baseDir}/config.json`;
   config = <Config>await readFile(configPath, { remotes: [] } as Config);
