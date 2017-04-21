@@ -59,7 +59,7 @@ export function ensureDirExists(path: string): Promise<any> {
       if (error) {
         reject(error);
         return;
-      } 
+      }
       if (!stats.isDirectory()) {
         reject(`${path} is not a directory`);
         return;
@@ -95,4 +95,16 @@ export function readFile(path: string, defaultContent: object): Promise<object> 
     });
   });
   return result;
+}
+
+export function writeFile(filePath: string, content: object): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    fs.writeFile(filePath, JSON.stringify(content), (error) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    });
+  });
 }

@@ -1,9 +1,9 @@
 import { find, uniqBy } from 'lodash';
 import { log } from './log';
 import * as fs from 'fs';
-import { ensureDirExists, readFile, sleep } from './util';
+import { ensureDirExists, readFile, writeFile, sleep } from './util';
 import { assertDefined, assertTrue } from './assert';
-import {ensureGitRepo, ensureFileIsCommited} from './git';
+import { ensureGitRepo, ensureFileIsCommited } from './git';
 
 export interface Repository {
   id: string;
@@ -65,6 +65,10 @@ export interface Data {
  */
 
 
+const baseDir = `${process.env.HOME}/.micro-manager`;
+const dataDir = `${baseDir}/data`;
+const dataFileName = 'data.json';
+const dataFileFullPath = `${dataDir}/${dataFileName}`;
 let data: Data;
 let config: Config;
 
@@ -73,29 +77,26 @@ let config: Config;
  */
 
 export async function init(): Promise<any> {
-  const baseDir = `${process.env.HOME}/.micro-manager`;
-  const dataDir = `${baseDir}/data`;
-  const dataFile = `${dataDir}/data.json`;
 
   await ensureDirExists(baseDir);
   await ensureDirExists(dataDir)
 
-  data = <Data>await readFile(dataFile, { repos: [] } as Data);
+  data = <Data>await readFile(dataFileFullPath, { repos: [] } as Data);
   await ensureGitRepo(dataDir);
-  await ensureFileIsCommited(dataDir, 'data.json');
+  await ensureFileIsCommited(dataDir, dataFileName);
 
   const configPath = `${baseDir}/config.json`;
   config = <Config>await readFile(configPath, { remotes: [] } as Config);
 }
 
-  // function validateData() {
-  //   for (const repo of data.repos) {
-  //     assertDefined(repo.id, `repo is invalid. id is missing ${repo}`)
-  //     assertDefined(repo.url, `repo is invalid. url is missing ${repo}`)
-  //     assertDefined(repo.type, `repo is invalid. type is missing ${repo}`)
-  //   }
-  //   assertTrue(checkForUniqueIds(data.repos));
-  // }
+// function validateData() {
+//   for (const repo of data.repos) {
+//     assertDefined(repo.id, `repo is invalid. id is missing ${repo}`)
+//     assertDefined(repo.url, `repo is invalid. url is missing ${repo}`)
+//     assertDefined(repo.type, `repo is invalid. type is missing ${repo}`)
+//   }
+//   assertTrue(checkForUniqueIds(data.repos));
+// }
 
 function checkForUniqueIds(array: { id: string }[]): boolean {
   return uniqBy(array, 'id').length !== array.length;
@@ -105,9 +106,11 @@ function checkForUniqueIds(array: { id: string }[]): boolean {
 export function getRepos(): Repository[] {
   return data.repos;
 }
-export function setData(_data: Data) {
+export function setData(_data: Data): Promise<void> {
   log.debug(`setting new data`, data);
   data = _data;
+  return writeFile(dataFileFullPath, data)
+    .then(() => ensureFileIsCommited(dataDir, dataFileName));
 }
 export function getData(): Data {
   return data;
@@ -122,7 +125,7 @@ export function mergeData(otherData: Data): Data | null {
 }
 
 
-function mergeRepos(repos1: Repository[], repos2: Repository[]): Repository[]{
+function mergeRepos(repos1: Repository[], repos2: Repository[]): Repository[] {
   const result: Repository[] = repos1.slice();
   for (const repo of repos2) {
     const otherRepo = find(repos1, ['id', repo.id]);

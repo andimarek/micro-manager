@@ -11,6 +11,7 @@ const PULL_COMMAND = 'PULL_COMMAND';
 const ENCODING = 'utf-8';
 const DEFAULT_CHANNEL = 'DEFAULT_CHANNEL';
 
+
 export function openServer(): Promise<any> {
   log(`opening server at port ${DEFAULT_PORT}`);
   const channel = {
@@ -18,7 +19,7 @@ export function openServer(): Promise<any> {
       log(`received command ${command}`);
       switch (command) {
         case PUSH_COMMAND:
-          return Promise.resolve(handlePush(<Data>arg));
+          return handlePush(<Data>arg).then( () => true, () => false);
         case PULL_COMMAND:
           return Promise.resolve(handlePull());
         default:
@@ -40,14 +41,13 @@ export function openServer(): Promise<any> {
     });
 }
 
-function handlePush(otherData: Data): boolean {
+function handlePush(otherData: Data): Promise<void> {
   log(`received data to merge:`, otherData);
   const mergedData = mergeData(otherData);
   if (mergedData) {
-    setData(mergedData);
-    return true;
+    return setData(mergedData);
   } else {
-    return false;
+    return Promise.reject('');
   }
 }
 
