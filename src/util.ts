@@ -38,6 +38,20 @@ export function executeCommand(command: string, args: string[], path: string): P
   return result;
 }
 
+export function executeCommandInShell(command: string, path: string): Promise<string> {
+  const result = new Promise((resolve, reject) => {
+    exec(command,{ cwd: path }, (error, stdout, stderr) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(stdout);
+    });
+  });
+  return result;
+}
+
+
 export function ensureDirExists(path: string): Promise<any> {
 
   function handleAccessError(error, resolve, reject) {
