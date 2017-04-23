@@ -136,6 +136,8 @@ function lineProcessor(chunk: string): void {
     }
   } else if (chunk === TAB) {
     completionHelp();
+  } else if (encodeURI(chunk) === '%1B%5BA' || encodeURI(chunk) === '%1B%5BB') {
+
   } else {
     currentLine += chunk;
     curColumn++;
