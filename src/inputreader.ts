@@ -1,6 +1,7 @@
 import { ReadStream, WriteStream } from "tty";
-import { find } from 'lodash';
+import { find, filter } from 'lodash';
 import { blue } from 'chalk';
+import * as S from 'string';
 
 export interface InputReader {
   onCancel(): void;
@@ -59,7 +60,7 @@ function getCommand(name: string): Command | undefined {
 }
 
 function printHelp() {
-  stdout.write('\n');
+  stdout.write(LF);
   stdout.write('available commands:');
   stdout.write(LF);
   commands.forEach(command => {
@@ -88,6 +89,36 @@ function newLine() {
   curColumn++;
 }
 
+function getPossibleCommands(startingWith: string): Command[] {
+  const result = filter(commands, (command) => S(command.name).startsWith(startingWith));
+  // if(S('help').startsWith(startingWith) {
+  //   result.push()
+  // }
+  return result;
+}
+
+function completionHelp() {
+  const possibleCommands = getPossibleCommands(currentLine);
+  if (possibleCommands.length === 0) return;
+  if (possibleCommands.length === 1) {
+    const name = possibleCommands[0].name;
+    const whatIsLeft = name.length - currentLine.length;
+    if (whatIsLeft > 0) {
+      stdout.write(name.substr(currentLine.length));
+    }
+    currentLine = name;
+    curColumn = name.length + 2;
+    return;
+  }
+  stdout.write(LF);
+  possibleCommands.forEach(command => {
+    stdout.write(command.name);
+    stdout.write(LF);
+  });
+  stdout.write(blue('>'));
+  stdout.write(currentLine);
+}
+
 function lineProcessor(chunk: string): void {
   if (chunk === CR || chunk == LF) {
     stdout.write('\n');
@@ -104,7 +135,7 @@ function lineProcessor(chunk: string): void {
       curColumn--;
     }
   } else if (chunk === TAB) {
-    // TODO: Completion
+    completionHelp();
   } else {
     currentLine += chunk;
     curColumn++;
