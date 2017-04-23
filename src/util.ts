@@ -2,6 +2,7 @@ import { dirSync } from 'tmp';
 import { exec, execFile, execSync } from 'child_process';
 import * as fs from 'fs';
 import { assertTrue } from './assert';
+import {log} from './log';
 
 export function sleep(seconds: number): void {
   execSync(`sleep ${seconds}`);
@@ -9,6 +10,22 @@ export function sleep(seconds: number): void {
 
 export function newTmpDir(): string {
   return dirSync().name;
+}
+
+export function addToArray<T>(collection: {[key:string]: T[]}, key: string, value: T): void {
+  if (collection[key]) {
+    collection[key].push(value);
+  } else {
+    collection[key] = [value];
+  }
+}
+
+export function makePath(part1: string, part2: string): string {
+  if (part1.endsWith('/')) {
+    return part1 + part2;
+  } else {
+    return part1 + '/' + part2;
+  }
 }
 
 export function fileExists(path: string): Promise<boolean> {
@@ -26,6 +43,7 @@ export function assertFileExists(path: string): Promise<void> {
 }
 
 export function executeCommand(command: string, args: string[], path: string): Promise<string> {
+  log.debug(`execute command ${command} ${args} in path ${path}`);
   const result = new Promise((resolve, reject) => {
     execFile(command, args, { cwd: path }, (error, stdout, stderr) => {
       if (error) {

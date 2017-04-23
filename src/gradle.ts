@@ -3,40 +3,40 @@ import { log } from './log';
 import { assertTrue } from './assert';
 import * as S from 'string';
 
-interface Dependency {
+export interface Dependency {
   groupId: string;
   artifactId: string;
   version: string;
 }
 
-interface Configuration {
+export interface Configuration {
   name: string;
   desc: string;
   dependencies: Dependency[];
 }
 
-export function getDependencies(path: string) {
-  executeCommand('./gradlew', ['dependencies'], path).then((result) => {
-    parse(result);
+export function getDependencies(path: string): Promise<Configuration[]> {
+  return executeCommand('./gradlew', ['dependencies'], path).then((result) => {
+    return parse(result);
   });
 }
 
-function parse(output: string) {
+function parse(output: string): Configuration[] {
   const lines = output.split('\n');
-  log('line count', lines.length);
   const startIx = searchForStart(lines);
-  log('startIx:', startIx);
   let curIx = startIx;
+  const result: Configuration[] = [];
   while (curIx < lines.length && lines[curIx] !== 'BUILD SUCCESSFUL') {
     if (lines[curIx] === '') {
       curIx++;
       continue;
     }
     const [configuration, parsedLines] = parseConfiguration(lines, curIx);
-    log('configuration: ', configuration);
+    // log.debu('configuration: ', configuration);
+    result.push(configuration);
     curIx += parsedLines;
   }
-  log('finished parsing');
+  return result;
 }
 
 function searchForStart(lines: string[]): number {

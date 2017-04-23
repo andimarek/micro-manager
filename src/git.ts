@@ -4,7 +4,7 @@ import { log } from './log';
 import * as fs from 'fs';
 
 export function gitClone(url: string, path: string): Promise<string> {
-  return executeCommand('git', ['clone', '--progress', url], path);
+  return executeCommand('git', ['clone', '--progress', url, path], path);
 }
 
 export function gitInit(path: string): Promise<any> {
@@ -31,7 +31,7 @@ export function gitCommit(repoPath: string, message: string): Promise<any> {
 
 export function ensureFileIsUnderVC(repoPath: string, fileInRepo: string): Promise<any> {
   return assertFileExists(repoPath + '/' + fileInRepo)
-    .then( () => gitStatus(repoPath, fileInRepo))
+    .then(() => gitStatus(repoPath, fileInRepo))
     .then((status: string) => {
       if (status && S(status).startsWith('? ')) {
         return gitAdd(repoPath, fileInRepo);

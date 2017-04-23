@@ -1,28 +1,46 @@
-import { Repository, Config } from './domain';
+import { Repository, Config, Project, getRepositoryByIdSafe } from './domain';
 import { exec, execFile } from 'child_process';
 import { log } from './log';
-import { newTmpDir, executeCommand } from './util';
+import { newTmpDir, executeCommand, makePath, addToArray } from './util';
+import { gitClone } from './git';
+import { uniqBy, find, constant, forEach } from 'lodash';
 
-import {gitClone} from './git';
-
-export function checkoutIntoTmp(repos: Repository[]): Promise<void> {
-  const tmpDir = newTmpDir();
+export function checkoutIntoTmp(repos: Iterable<Repository>): Promise<{ [repoId: string]: string }> {
   const promises: Promise<string>[] = [];
-  log(`tmpDir: ${tmpDir}`);
+  const pathByRepoId: { [repoId: string]: string } = {};
   for (const repo of repos) {
-    log(`checking out ${repo.url}`);
+    const tmpDir = newTmpDir();
+    log.debug(`checking out ${repo.url} into ${tmpDir}`);
+    pathByRepoId[repo.id] = tmpDir;
     promises.push(gitClone(repo.url, tmpDir));
   }
-  return Promise.all(promises).then(() => { 
-    log.success('checked out all repos') 
+  return Promise.all(promises).then(constant(pathByRepoId));
+}
+
+export type PathByProjectId = { [projectId: string]: string };
+
+export function checkoutAllProjects(projects: Project[]): Promise<PathByProjectId> {
+  const repoByProjectId: { [projectId: string]: Repository }[] = [];
+  const projectsByRepoId: { [repoId: string]: Project[] } = {};
+  const allRepos: Set<Repository> = new Set<Repository>();
+  for (const project of projects) {
+    const repo = getRepositoryByIdSafe(project.repositoryId);
+    addToArray(projectsByRepoId, repo.id, project);
+    repoByProjectId[project.id] = repo;
+    allRepos.add(repo);
+  }
+  return checkoutIntoTmp(allRepos).then((pathByRepoId) => {
+    log.debug(`checked out all repos`);
+    const pathByProjectId: { [projectId: string]: string } = {};
+    forEach(pathByRepoId, (path, repoId: string) => {
+      const projects = projectsByRepoId[repoId];
+      for (const project of projects) {
+        pathByProjectId[project.id] = makePath(path, project.path);
+      }
+    });
+    return pathByProjectId;
   });
 }
 
-export function checkout(repos: Repository[], config: Config) {
-  for (const repo of repos) {
-    console.log(`checking out ${repo.url}`);
-    gitClone(repo.url, config.rootPath!);
-  }
-}
 
 

@@ -9,6 +9,9 @@ import pull from './commands/pull';
 import config from './commands/config';
 import data from './commands/data';
 import exit from './commands/exit';
+import analyzeDeps from './commands/analyzeDeps';
+
+import {getDependencies} from './gradle';
 
 import { ensureGitRepo } from './git';
 
@@ -31,10 +34,13 @@ const commands: Command[] = [
   pull,
   config,
   data,
-  exit
+  exit,
+  analyzeDeps
 ];
 setCommands(commands);
 
 init()
   .then(openServer)
   .then(startReadingInput);
+
+getDependencies('/Users/andi/dev/projects/graphql-java');

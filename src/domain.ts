@@ -24,11 +24,9 @@ export interface Project {
   type: ProjectType;
 }
 
-export enum ProjectType {
-  JavaMaven,
-  JavaGradle,
-  JavaScriptNpm
-}
+export const PROJECT_TYPE_GRADLE = 'Gradle';
+export const PROJECT_TYPE_MAVEN = 'Maven';
+export type ProjectType = 'Gradle' | 'Maven';
 
 // export enum ProgrammingLanguage {
 //   Java,
@@ -56,6 +54,7 @@ export interface RemoteManager {
 
 export interface Data {
   repos: Repository[];
+  projects: Project[]; 
 }
 
 
@@ -65,7 +64,7 @@ export interface Data {
  */
 
 
-const baseDir = `${process.env.HOME}/.micro-manager`;
+const baseDir = `${process.env.HOME}/micro-manager`;
 const dataDir = `${baseDir}/data`;
 const dataFileName = 'data.json';
 const dataFileFullPath = `${dataDir}/${dataFileName}`;
@@ -81,7 +80,8 @@ export async function init(): Promise<any> {
   await ensureDirExists(baseDir);
   await ensureDirExists(dataDir)
 
-  data = <Data>await readFile(dataFileFullPath, { repos: [] } as Data);
+  data = <Data>await readFile(dataFileFullPath, { repos: [], projects: [] } as Data);
+  log.debug('data:', data);
   await ensureGitRepo(dataDir);
   await ensureFileIsCommited(dataDir, dataFileName);
 
@@ -106,6 +106,16 @@ function checkForUniqueIds(array: { id: string }[]): boolean {
 export function getRepos(): Repository[] {
   return data.repos;
 }
+
+export function getRepositoryById(id: string): Repository | undefined {
+  return find(data.repos, (repo) => repo.id === id);
+}
+
+export function getRepositoryByIdSafe(id: string): Repository {
+  const result = getRepositoryById(id);
+  assertDefined(result, `repository with id ${id} not found`);
+  return result!;
+}
 export function setData(_data: Data): Promise<void> {
   log.debug(`setting new data`, data);
   data = _data;
@@ -118,8 +128,10 @@ export function getData(): Data {
 
 export function mergeData(otherData: Data): Data | null {
   const newRepos = mergeRepos(otherData.repos, data.repos);
+  const newProjects = mergeProjects(otherData.projects, data.projects);
   const result: Data = {
-    repos: newRepos
+    repos: newRepos,
+    projects: newProjects
   }
   return result;
 }
