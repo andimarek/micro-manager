@@ -24,14 +24,14 @@ export interface Project {
   type: ProjectType;
 }
 
-export const PROJECT_TYPE_GRADLE = 'Gradle';
-export const PROJECT_TYPE_MAVEN = 'Maven';
-export type ProjectType = 'Gradle' | 'Maven';
+export const PROJECT_TYPE_GRADLE = 'gradle';
+export const PROJECT_TYPE_MAVEN = 'maven';
 
-// export enum ProgrammingLanguage {
-//   Java,
-//   JavaScript
-// }
+export interface GradleComplexType {
+  name: string;
+  'gradlew-path': string
+};
+export type ProjectType = string | GradleComplexType;
 
 export interface Product {
   name: string;
@@ -54,7 +54,7 @@ export interface RemoteManager {
 
 export interface Data {
   repos: Repository[];
-  projects: Project[]; 
+  projects: Project[];
 }
 
 

@@ -17,7 +17,7 @@ export function checkoutIntoTmp(repos: Iterable<Repository>): Promise<{ [repoId:
   return Promise.all(promises).then(constant(pathByRepoId));
 }
 
-export type PathByProjectId = { [projectId: string]: string };
+export type PathByProjectId = { [projectId: string]: { projectPath: string, repoPath: string } };
 
 export function checkoutAllProjects(projects: Project[]): Promise<PathByProjectId> {
   const repoByProjectId: { [projectId: string]: Repository }[] = [];
@@ -31,11 +31,14 @@ export function checkoutAllProjects(projects: Project[]): Promise<PathByProjectI
   }
   return checkoutIntoTmp(allRepos).then((pathByRepoId) => {
     log.debug(`checked out all repos`);
-    const pathByProjectId: { [projectId: string]: string } = {};
+    const pathByProjectId: PathByProjectId = {};
     forEach(pathByRepoId, (path, repoId: string) => {
       const projects = projectsByRepoId[repoId];
       for (const project of projects) {
-        pathByProjectId[project.id] = makePath(path, project.path);
+        pathByProjectId[project.id] = {
+          repoPath: path,
+          projectPath: makePath(path, project.path)
+        };
       }
     });
     return pathByProjectId;

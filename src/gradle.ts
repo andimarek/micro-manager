@@ -1,7 +1,9 @@
-import { executeCommand, executeCommandInShell } from './util';
+import { executeCommand, executeCommandInShell, makePath } from './util';
 import { log } from './log';
 import { assertTrue } from './assert';
 import * as S from 'string';
+import { Project, GradleComplexType } from './domain';
+import { isObject } from 'lodash';
 
 export interface Dependency {
   groupId: string;
@@ -15,8 +17,15 @@ export interface Configuration {
   dependencies: Dependency[];
 }
 
-export function getDependencies(path: string): Promise<Configuration[]> {
-  return executeCommand('./gradlew', ['dependencies'], path).then((result) => {
+export function getDependencies(projectPath: string, repoPath: string, project: Project): Promise<Configuration[]> {
+  let gradlewPath: string;
+  if (isObject(project.type)) {
+    gradlewPath = makePath(repoPath, (<GradleComplexType>project.type)['gradlew-path'], 'gradlew');
+    // log.debug('gradlepath with', gradlewPath, ' from ', projectPath, (<GradleComplexType>project.type)['gradlew-path'], 'gradlew');
+  } else {
+    gradlewPath = './gradlew';
+  }
+  return executeCommand(gradlewPath, ['dependencies'], projectPath).then((result) => {
     return parse(result);
   });
 }
@@ -76,7 +85,7 @@ function parseDependenciesForOneConfiguration(lines: string[], startIx: number, 
     assertTrue(end > 0 && start < end, `unexpected format ${curLine} ... no end`);
     configuration.dependencies.push(parseDependency(curLine.substring(start + 2, end)));
     if (end > 0 && curLine.indexOf(' -> ', end) > 0) {
-      const realVersion = curLine.substring(curLine.indexOf(' -> ',end) + 4);
+      const realVersion = curLine.substring(curLine.indexOf(' -> ', end) + 4);
       const dependency = configuration.dependencies[configuration.dependencies.length - 1];
       log.debug(`replacing dependency version ${dependency.version} with real version ${realVersion}`);
       dependency.version = realVersion;

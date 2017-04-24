@@ -20,14 +20,19 @@ export function addToArray<T>(collection: { [key: string]: T[] }, key: string, v
   }
 }
 
-export function makePath(part1: string, part2: string): string {
+export function makePath(part1: string, part2: string): string;
+export function makePath(part1: string, part2: string, part3: string): string;
+export function makePath(part1: string, part2: string, part3?: string): string {
+  if (part3) {
+    return makePath(makePath(part1, part2), part3);
+  }
   let p1 = part1;
   let p2 = part2;
-  if (part2.startsWith('/')) {
-    p2 = p2.substring(0, part2.length - 1);
+  if (p1.endsWith('/')) {
+    p1 = p1.substring(0, p1.length - 1);
   }
-  if (!part1.endsWith('/')) {
-    p1 += '/';
+  if (!p2.startsWith('/')) {
+    p2 = '/' + p2;
   }
   return p1 + p2;
 }
