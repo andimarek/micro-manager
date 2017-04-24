@@ -22,6 +22,7 @@ export function getDependencies(path: string): Promise<Configuration[]> {
 }
 
 function parse(output: string): Configuration[] {
+  log.debug('trying to parse:', output);
   const lines = output.split('\n');
   const startIx = searchForStart(lines);
   let curIx = startIx;
@@ -51,10 +52,10 @@ function searchForStart(lines: string[]): number {
 function parseConfiguration(lines: string[], curIx: number): [Configuration, number] {
   const header = lines[curIx];
   const parts = header.split(' - ');
-  assertTrue(parts.length === 2, `unexpected configuration header format: ${header} in line index ${curIx}`);
+  assertTrue(parts.length == 1 || parts.length === 2, `unexpected configuration header format: ${header} in line index ${curIx}`);
   const configuration = {
     name: parts[0],
-    desc: parts[1],
+    desc: parts[1] || '',
     dependencies: []
   };
   const parsedLines = parseDependenciesForOneConfiguration(lines, curIx + 1, configuration);
@@ -74,6 +75,12 @@ function parseDependenciesForOneConfiguration(lines: string[], startIx: number, 
     const end = optionalSpace > -1 ? optionalSpace : curLine.length;
     assertTrue(end > 0 && start < end, `unexpected format ${curLine} ... no end`);
     configuration.dependencies.push(parseDependency(curLine.substring(start + 2, end)));
+    if (end > 0 && curLine.indexOf(' -> ', end) > 0) {
+      const realVersion = curLine.substring(curLine.indexOf(' -> ',end) + 4);
+      const dependency = configuration.dependencies[configuration.dependencies.length - 1];
+      log.debug(`replacing dependency version ${dependency.version} with real version ${realVersion}`);
+      dependency.version = realVersion;
+    }
     curIx++;
   }
   return curIx - startIx;

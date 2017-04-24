@@ -2,7 +2,7 @@ import { dirSync } from 'tmp';
 import { exec, execFile, execSync } from 'child_process';
 import * as fs from 'fs';
 import { assertTrue } from './assert';
-import {log} from './log';
+import { log } from './log';
 
 export function sleep(seconds: number): void {
   execSync(`sleep ${seconds}`);
@@ -12,7 +12,7 @@ export function newTmpDir(): string {
   return dirSync().name;
 }
 
-export function addToArray<T>(collection: {[key:string]: T[]}, key: string, value: T): void {
+export function addToArray<T>(collection: { [key: string]: T[] }, key: string, value: T): void {
   if (collection[key]) {
     collection[key].push(value);
   } else {
@@ -21,11 +21,15 @@ export function addToArray<T>(collection: {[key:string]: T[]}, key: string, valu
 }
 
 export function makePath(part1: string, part2: string): string {
-  if (part1.endsWith('/')) {
-    return part1 + part2;
-  } else {
-    return part1 + '/' + part2;
+  let p1 = part1;
+  let p2 = part2;
+  if (part2.startsWith('/')) {
+    p2 = p2.substring(0, part2.length - 1);
   }
+  if (!part1.endsWith('/')) {
+    p1 += '/';
+  }
+  return p1 + p2;
 }
 
 export function fileExists(path: string): Promise<boolean> {
@@ -58,7 +62,7 @@ export function executeCommand(command: string, args: string[], path: string): P
 
 export function executeCommandInShell(command: string, path: string): Promise<string> {
   const result = new Promise((resolve, reject) => {
-    exec(command,{ cwd: path }, (error, stdout, stderr) => {
+    exec(command, { cwd: path }, (error, stdout, stderr) => {
       if (error) {
         reject(error);
         return;
