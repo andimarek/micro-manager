@@ -78,24 +78,36 @@ function parseDependenciesForOneConfiguration(lines: string[], startIx: number, 
     if (curLine === 'No dependencies') {
       return 2;
     }
+    if (curLine.startsWith('Download ')) {
+      curIx++;
+      continue;
+    }
     const start = curLine.indexOf('- ');
     assertTrue(start > 0, `unexpected format ${curLine} ... no start`);
     const optionalSpace = curLine.indexOf(' ', start + 2);
     const end = optionalSpace > -1 ? optionalSpace : curLine.length;
     assertTrue(end > 0 && start < end, `unexpected format ${curLine} ... no end`);
-    configuration.dependencies.push(parseDependency(curLine.substring(start + 2, end)));
-    if (end > 0 && curLine.indexOf(' -> ', end) > 0) {
-      const realVersion = curLine.substring(curLine.indexOf(' -> ', end) + 4);
-      const dependency = configuration.dependencies[configuration.dependencies.length - 1];
-      log.debug(`replacing dependency version ${dependency.version} with real version ${realVersion}`);
-      dependency.version = realVersion;
+    const dependency = parseDependency(curLine.substring(start + 2, end));
+    if (dependency) {
+      configuration.dependencies.push(dependency);
+      if (end > 0 && curLine.indexOf(' -> ', end) > 0) {
+        const realVersionStart = curLine.indexOf(' -> ', end) + 4;
+        const optionalRemark = curLine.indexOf(' (*)', realVersionStart);
+        const realVersion = curLine.substring(realVersionStart, optionalRemark > 0 ? optionalRemark : curLine.length);
+        const dependency = configuration.dependencies[configuration.dependencies.length - 1];
+        log.debug(`replacing dependency version ${dependency.version} with real version ${realVersion}`);
+        dependency.version = realVersion;
+      }
     }
     curIx++;
   }
   return curIx - startIx;
 }
 
-function parseDependency(toParse: string): Dependency {
+function parseDependency(toParse: string): Dependency | null {
+  if (toParse === 'project') {
+    return null;
+  }
   const parts = toParse.split(':');
   assertTrue(parts.length === 3, `unexpected dependency format: ${toParse}`);
   return {
