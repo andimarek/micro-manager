@@ -11,11 +11,6 @@ import data from './commands/data';
 import exit from './commands/exit';
 import analyzeDeps from './commands/analyzeDeps';
 
-import {getDependencies} from './gradle';
-
-import { ensureGitRepo } from './git';
-
-
 process.on('uncaughtException', (exception) => {
   log.error(`uncaught exception ${exception} ... exiting now`);
   process.exit(1);
@@ -42,5 +37,3 @@ setCommands(commands);
 init()
   .then(openServer)
   .then(startReadingInput);
-
-getDependencies('/Users/andi/dev/projects/graphql-java');
