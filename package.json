@@ -23,8 +23,10 @@
     "webpack": "^2.3.3"
   },
   "dependencies": {
+    "@types/async": "^2.0.40",
     "@types/chalk": "^0.4.31",
     "@types/string": "^0.0.28",
+    "async": "^2.3.0",
     "chalk": "^1.1.3",
     "fs-extra": "^2.1.2",
     "lodash": "^4.17.4",
