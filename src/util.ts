@@ -56,7 +56,7 @@ export function executeCommand(command: string, args: string[], path: string): P
   const result = new Promise((resolve, reject) => {
     execFile(command, args, { cwd: path }, (error, stdout, stderr) => {
       if (error) {
-        reject(error);
+        reject({error, stdout, stderr});
         return;
       }
       resolve(stdout);

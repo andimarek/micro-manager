@@ -1,27 +1,32 @@
 import { Repository, Config, getRepos, getConfig } from '../domain';
 import { spawn } from 'child_process';
 import {noop} from 'lodash';
-import {gitClone} from '../git';
+import {gitCloneInWorkspace} from '../git';
+import {log} from '../log';
+import {ensureDirExists} from '../util';
 
 import {Command} from '../inputreader';
 const command: Command = {
   name: 'checkout',
-  arguments: [
+  arguments: [ 
+    {name: "dir"}
   ],
   execute(args: string[]): Promise<void> {
-    return checkout();
+    return checkout(args[0]);
   }
 };
 
 export default command;
 
-function checkout(): Promise<void> {
+async function checkout(targetDir:string): Promise<void> {
   const repos = getRepos(); 
   const config = getConfig();
   const promises: Promise<any>[] = [];
+  await ensureDirExists(targetDir);
+  log.debug(`checking out all repos into: ${targetDir}`);
   for (const repo of repos) {
-    console.log(`checking out ${repo.url}`);
-    promises.push(gitClone(repo.url, config.rootPath!));
+    log.debug(`checking out ${repo.url}`);
+    promises.push(gitCloneInWorkspace(repo.url, targetDir));
   }
   return Promise.all(promises).then(noop);
 }

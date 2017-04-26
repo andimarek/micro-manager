@@ -7,6 +7,10 @@ export function gitClone(url: string, path: string): Promise<string> {
   return executeCommand('git', ['clone', '--progress', url, path], path);
 }
 
+export function gitCloneInWorkspace(url:string, workspace: string): Promise<string> {
+  return executeCommand('git', ['clone', '--progress', url], workspace);
+} 
+
 export function gitInit(path: string): Promise<any> {
   return executeCommand('git', ['init'], path);
 }
