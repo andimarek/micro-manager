@@ -1,4 +1,4 @@
-import { pickBy, size, forEach, find, uniqBy, reduce, groupBy, filter } from 'lodash';
+import { isUndefined, includes, pickBy, size, forEach, find, uniqBy, reduce, groupBy, filter } from 'lodash';
 import { log } from './log';
 import * as fs from 'fs';
 import { ensureDirExists, readFile, writeFile, sleep } from './util';
@@ -7,14 +7,12 @@ import { ensureGitRepo, ensureFileIsCommited } from './git';
 
 export interface Repository {
   id: string;
-  type: RepositoryType;
+  type: string;
   url: string;
 }
 
-export enum RepositoryType {
-  Git,
-  Svn
-}
+export const REPOSITORY_TYPE_GIT = 'git';
+const REPO_TYPES = [REPOSITORY_TYPE_GIT];
 
 export interface Project {
   id: string;
@@ -25,10 +23,11 @@ export interface Project {
 }
 
 export const PROJECT_TYPE_GRADLE = 'gradle';
-export const PROJECT_TYPE_MAVEN = 'maven';
+// export const PROJECT_TYPE_MAVEN = 'maven';
+const PROJECT_TYPES = [PROJECT_TYPE_GRADLE];
 
 export interface GradleComplexType {
-  name: string;
+  name: 'gradle';
   'gradlew-path': string
 };
 export type ProjectType = string | GradleComplexType;
@@ -93,6 +92,7 @@ export async function init(): Promise<any> {
 function validateData() {
   validateRepos();
   validateProjects();
+  validateRepoReferences();
 }
 
 function validateRepoReferences() {
@@ -107,13 +107,45 @@ function validateRepoReferences() {
 function validateProjects() {
   checkForDuplicateProjectIds();
   checkForDuplicateProjectNames();
+  validProjectTypes();
 }
 
 function validateRepos() {
   checkForDuplicateRepoIds();
   checkForDuplicateRepoUrls();
+  validateRepoTypes();
 }
-function getDuplicates<T>(data: T[], propName: string): {[key:string]: T[]} {
+
+function validProjectTypes() {
+  const invalidProjects = filter(data.projects, (project) => {
+    if (includes(PROJECT_TYPES, project.type)) {
+      return false;
+    }
+    const complexType = <GradleComplexType>project.type;
+    if (complexType.name !== PROJECT_TYPE_GRADLE) {
+      return true;
+    }
+    if(isUndefined(complexType['gradlew-path'])) {
+      return true;
+    }
+  });
+  if (invalidProjects.length > 0) {
+    log.error(`invalid project types:`, invalidProjects);
+    throw new Error('invalid projects');
+  }
+
+}
+
+function validateRepoTypes() {
+  const invalidRepos = filter(data.repos, (repo) => !includes(REPO_TYPES, repo.type));
+  if (invalidRepos.length > 0) {
+    log.error(`invalid repo types:`, invalidRepos);
+    log.error(`allowed repo types:`, REPO_TYPES);
+    throw new Error('invalid repos');
+  }
+}
+
+function getDuplicates<T>(data: T[], propName: string): { [key: string]: T[] } {
   type ById = { [key: string]: T[] };
   const byId = <ById>groupBy(data, propName);
   const duplicates = <ById>pickBy(byId, (elements) => elements.length > 1);
