@@ -3,7 +3,7 @@ import { exec, execFile } from 'child_process';
 import { log } from './log';
 import { newTmpDir, executeCommand, makePath, addToArray } from './util';
 import { gitClone } from './git';
-import { uniqBy, find, constant, forEach } from 'lodash';
+import { flatMap, keys, map, reduce, uniqBy, find, constant, forEach } from 'lodash';
 
 export function checkoutIntoTmp(repos: Iterable<Repository>): Promise<{ [repoId: string]: string }> {
   const promises: Promise<string>[] = [];
@@ -31,17 +31,22 @@ export function checkoutAllProjects(projects: Project[]): Promise<PathByProjectI
   }
   return checkoutIntoTmp(allRepos).then((pathByRepoId) => {
     log.debug(`checked out all repos`);
-    const pathByProjectId: PathByProjectId = {};
-    forEach(pathByRepoId, (path, repoId: string) => {
+    type RepoPathProject = [string, Project];
+    const repoIds = keys(pathByRepoId);
+    const repoPathProjecTuples: RepoPathProject[] = flatMap(repoIds, (repoId): RepoPathProject[] => {
       const projects = projectsByRepoId[repoId];
-      for (const project of projects) {
-        pathByProjectId[project.id] = {
+      const repoPath = pathByRepoId[repoId];
+      return map(projects, (project) => [repoPath, project] as RepoPathProject);
+    });
+    return reduce(repoPathProjecTuples, (acc, [path, project]) => {
+      return {
+        [project.id]: {
           repoPath: path,
           projectPath: makePath(path, project.path)
-        };
-      }
-    });
-    return pathByProjectId;
+        },
+        ...acc
+      };
+    }, {} as PathByProjectId);
   });
 }
 
