@@ -92,17 +92,27 @@ export async function init(): Promise<any> {
 
 function validateData() {
   validateRepos();
+  validateProjects();
+}
+
+function validateProjects() {
+  checkForDuplicateProjectIds();
+  checkForDuplicateProjectNames();
 }
 
 function validateRepos() {
-  checkForDuplicateIds();
-  checkForDuplicateUrls();
+  checkForDuplicateRepoIds();
+  checkForDuplicateRepoUrls();
+}
+function getDuplicates<T>(data: T[], propName: string): {[key:string]: T[]} {
+  type ById = { [key: string]: T[] };
+  const byId = <ById>groupBy(data, propName);
+  const duplicates = <ById>pickBy(byId, (elements) => elements.length > 1);
+  return duplicates;
 }
 
-function checkForDuplicateUrls() {
-  type ReposByUrl = { [id: string]: Repository[] };
-  const byId = <ReposByUrl>groupBy(data.repos, 'url');
-  const duplicates = <ReposByUrl>pickBy(byId, (repos) => repos.length > 1);
+function checkForDuplicateRepoUrls() {
+  const duplicates = getDuplicates(data.repos, 'url');
   if (size(duplicates) > 0) {
     log.error(`invalid repos: duplicate urls`);
     forEach(duplicates, (repos, url) => {
@@ -112,14 +122,36 @@ function checkForDuplicateUrls() {
     throw new Error('invalid data');
   }
 }
-function checkForDuplicateIds() {
-  type ReposById = { [id: string]: Repository[] };
-  const byId = <ReposById>groupBy(data.repos, 'id');
-  const duplicates = <ReposById>pickBy(byId, (repos) => repos.length > 1);
+function checkForDuplicateRepoIds() {
+  const duplicates = getDuplicates(data.repos, 'id');
   if (size(duplicates) > 0) {
     log.error(`invalid repos: duplicate ids`);
     forEach(duplicates, (repos, id) => {
       log.error(`repos with the same id '${id}':`, repos);
+    });
+    log.error(`abort ... please fix that`);
+    throw new Error('invalid data');
+  }
+}
+
+function checkForDuplicateProjectNames() {
+  const duplicates = getDuplicates(data.projects, 'name');
+  if (size(duplicates) > 0) {
+    log.error(`invalid projects: duplicate names`);
+    forEach(duplicates, (projects, name) => {
+      log.error(`projects with the same name '${name}':`, projects);
+    });
+    log.error(`abort ... please fix that`);
+    throw new Error('invalid data');
+  }
+}
+
+function checkForDuplicateProjectIds() {
+  const duplicates = getDuplicates(data.projects, 'id');
+  if (size(duplicates) > 0) {
+    log.error(`invalid projects: duplicate ids`);
+    forEach(duplicates, (projects, id) => {
+      log.error(`projects with the same ids '${id}':`, projects);
     });
     log.error(`abort ... please fix that`);
     throw new Error('invalid data');
