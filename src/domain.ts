@@ -1,4 +1,4 @@
-import { find, uniqBy } from 'lodash';
+import { size, forEach, find, uniqBy, reduce, groupBy, filter } from 'lodash';
 import { log } from './log';
 import * as fs from 'fs';
 import { ensureDirExists, readFile, writeFile, sleep } from './util';
@@ -82,11 +82,36 @@ export async function init(): Promise<any> {
 
   data = <Data>await readFile(dataFileFullPath, { repos: [], projects: [] } as Data);
   log.debug('data:', data);
+  validateData();
   await ensureGitRepo(dataDir);
   await ensureFileIsCommited(dataDir, dataFileName);
 
   const configPath = `${baseDir}/config.json`;
   config = <Config>await readFile(configPath, { remotes: [] } as Config);
+}
+
+function validateData() {
+  validateRepos();
+}
+
+function validateRepos() {
+  type ReposById = { [id: string]: Repository[] };
+  const byId = <ReposById>groupBy(data.repos, 'id');
+  const duplicates = reduce(byId, (acc, repos, id) => {
+    if (repos.length > 1) {
+      acc[id] = repos;
+    }
+    return acc;
+  }, {} as ReposById);
+
+  if (size(duplicates) > 0) {
+    log.error(`invalid repos: duplicate ids`);
+    forEach(duplicates, (repos, id) => {
+      log.error(`repos with the same id ${id}:`, repos);
+    });
+    log.error(`abort ... please fix that`);
+    throw new Error('invalid data');
+  }
 }
 
 // function validateData() {
