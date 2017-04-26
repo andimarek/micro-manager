@@ -95,6 +95,15 @@ function validateData() {
   validateProjects();
 }
 
+function validateRepoReferences() {
+  const invalidReferences = filter(data.projects, (project) => getRepositoryById(project.repositoryId) === undefined);
+  if (invalidReferences.length > 0) {
+    log.error(`invalid projects: the repositoryId is not valid for the following projects`);
+    log.error(`invalid projects:`, invalidReferences);
+    throw new Error('invalid data');
+  }
+}
+
 function validateProjects() {
   checkForDuplicateProjectIds();
   checkForDuplicateProjectNames();
