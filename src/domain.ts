@@ -1,4 +1,4 @@
-import { size, forEach, find, uniqBy, reduce, groupBy, filter } from 'lodash';
+import { pickBy, size, forEach, find, uniqBy, reduce, groupBy, filter } from 'lodash';
 import { log } from './log';
 import * as fs from 'fs';
 import { ensureDirExists, readFile, writeFile, sleep } from './util';
@@ -95,19 +95,31 @@ function validateData() {
 }
 
 function validateRepos() {
+  checkForDuplicateIds();
+  checkForDuplicateUrls();
+}
+
+function checkForDuplicateUrls() {
+  type ReposByUrl = { [id: string]: Repository[] };
+  const byId = <ReposByUrl>groupBy(data.repos, 'url');
+  const duplicates = <ReposByUrl>pickBy(byId, (repos) => repos.length > 1);
+  if (size(duplicates) > 0) {
+    log.error(`invalid repos: duplicate urls`);
+    forEach(duplicates, (repos, url) => {
+      log.error(`repos with the same url '${url}':`, repos);
+    });
+    log.error(`abort ... please fix that`);
+    throw new Error('invalid data');
+  }
+}
+function checkForDuplicateIds() {
   type ReposById = { [id: string]: Repository[] };
   const byId = <ReposById>groupBy(data.repos, 'id');
-  const duplicates = reduce(byId, (acc, repos, id) => {
-    if (repos.length > 1) {
-      acc[id] = repos;
-    }
-    return acc;
-  }, {} as ReposById);
-
+  const duplicates = <ReposById>pickBy(byId, (repos) => repos.length > 1);
   if (size(duplicates) > 0) {
     log.error(`invalid repos: duplicate ids`);
     forEach(duplicates, (repos, id) => {
-      log.error(`repos with the same id ${id}:`, repos);
+      log.error(`repos with the same id '${id}':`, repos);
     });
     log.error(`abort ... please fix that`);
     throw new Error('invalid data');
