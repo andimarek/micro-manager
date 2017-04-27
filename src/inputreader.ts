@@ -64,7 +64,7 @@ class Line {
     return this.content;
   }
 
-  backspace() {
+  backspace(): void {
     if (this.content.length === 0) return;
     this.content = this.content.substr(0, this.content.length - 1);
     this.clearLine(this.curColumn - 1);
@@ -88,8 +88,6 @@ const ARROW_UP_ENCODED = '%1B%5BA';
 const ARROW_DOWN_ENCODED = '%1B%5BB';
 const historyFile = `${MicroManagerBaseDir}/history.json`;
 
-type Processor = (chunk: string) => void;
-let currentProcessor: Processor = lineProcessor;
 
 let commands: Command[];
 let history: string[];
@@ -174,44 +172,49 @@ function completionHelp() {
   line.newCommandLine(line.content);
 }
 
-function lineProcessor(chunk: string): void {
+function lineProcessor(chunk: string): Promise<void> {
   if (chunk === CR || chunk == LF) {
     stdout.write('\n');
-    handleLine(line.content).then(() => {
+    return handleLine(line.content).then(() => {
       line.newCommandLine();
     });
   } else if (chunk === BACKSPACE) {
     line.backspace();
+    return Promise.resolve();
   } else if (chunk === TAB) {
     completionHelp();
+    return Promise.resolve();
   } else if (encodeURI(chunk) === ARROW_UP_ENCODED) {
     if (history.length > 0) {
       line.replaceCurrenteLine(history[history.length - 1]);
     }
-
+    return Promise.resolve();
   } else if (encodeURI(chunk) === ARROW_DOWN_ENCODED) {
-
+    return Promise.resolve();
+  } if (chunk === CTRL_C) {
+    stop();
+    return Promise.resolve();
   } else {
     line.write(chunk);
+    return Promise.resolve();
   }
   // console.log('1:', encodeURI(chunk));
-  if (chunk === CTRL_C) {
-    stop();
-  }
-
 }
 
-export function start(): Promise<any> {
+export function start(commandToExecute?:string): Promise<any> {
   return readFile(historyFile, [])
     .then((savedHistory) => {
-      log(`history: `, savedHistory);
       history = savedHistory;
     })
     .then(() => {
       line.newCommandLine();
       stdin.on('data', (chunk: string) => {
-        currentProcessor(chunk);
+        lineProcessor(chunk);
       });
+      if (commandToExecute) {
+        line.write(commandToExecute);
+        lineProcessor(CR).then(stop);
+      }
     });
 }
 export function stop(): Promise<void> {
