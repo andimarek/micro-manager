@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import { ensureDirExists, readFile, writeFile, sleep } from './util';
 import { assertDefined, assertTrue } from './assert';
 import { ensureGitRepo, ensureFileIsCommited } from './git';
+import {MicroManagerBaseDir} from './constants';
 
 export interface Repository {
   id: string;
@@ -63,8 +64,7 @@ export interface Data {
  */
 
 
-const baseDir = `${process.env.HOME}/micro-manager`;
-const dataDir = `${baseDir}/data`;
+const dataDir = `${MicroManagerBaseDir}/data`;
 const dataFileName = 'data.json';
 const dataFileFullPath = `${dataDir}/${dataFileName}`;
 let data: Data;
@@ -76,7 +76,7 @@ let config: Config;
 
 export async function init(): Promise<any> {
 
-  await ensureDirExists(baseDir);
+  await ensureDirExists(MicroManagerBaseDir);
   await ensureDirExists(dataDir)
 
   data = <Data>await readFile(dataFileFullPath, { repos: [], projects: [] } as Data);
@@ -85,7 +85,7 @@ export async function init(): Promise<any> {
   await ensureGitRepo(dataDir);
   await ensureFileIsCommited(dataDir, dataFileName);
 
-  const configPath = `${baseDir}/config.json`;
+  const configPath = `${MicroManagerBaseDir}/config.json`;
   config = <Config>await readFile(configPath, { remotes: [] } as Config);
 }
 

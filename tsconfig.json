@@ -4,6 +4,7 @@
     "sourceMap": true,
     "noImplicitAny": false,
     "strictNullChecks": true,
+    "noImplicitThis": true,
     "module": "commonjs",
     "target": "es2015",
     "lib": [

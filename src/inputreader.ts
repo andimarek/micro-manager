@@ -1,7 +1,10 @@
 import { ReadStream, WriteStream } from "tty";
 import { find, filter } from 'lodash';
 import { blue } from 'chalk';
-import * as S from 'string';
+import { readFile, writeFile } from './util';
+import { MicroManagerBaseDir } from './constants';
+import { log } from './log';
+
 
 export interface InputReader {
   onCancel(): void;
@@ -18,20 +21,79 @@ export interface CommandArgument {
   name: string;
 }
 
+class Line {
+  curColumn: number;
+  public content: string;
+
+  constructor() {
+    this.curColumn = 1;
+  }
+
+  newCommandLine(predefined?: string) {
+    // stdout.write(LF);
+    stdout.write(blue('>'));
+    if (predefined) {
+      stdout.write(predefined);
+      this.curColumn = predefined.length + 2;
+      this.content = predefined;
+    } else {
+      this.curColumn = 2;
+      this.content = '';
+    }
+  }
+
+  clear() {
+    this.curColumn = 1;
+    this.content = '';
+  }
+
+  write(toPrint: string) {
+    stdin.write(toPrint);
+    this.content += toPrint;
+    this.curColumn += toPrint.length;
+  }
+
+  replaceCurrenteLine(newLine: string) {
+    this.clearLine(2);
+    this.curColumn = 2;
+    this.write(newLine);
+  }
+
+  currentValue(): string {
+    return this.content;
+  }
+
+  backspace() {
+    if (this.content.length === 0) return;
+    this.content = this.content.substr(0, this.content.length - 1);
+    this.clearLine(this.curColumn - 1);
+    this.curColumn--;
+  }
+
+  private clearLine(startingFrom: number) {
+    process.stdout.write(`\u001b[${startingFrom}G`);
+    process.stdout.write('\u001b[K');
+  }
+
+}
+
 const CR = '\r';
 const LF = '\n';
 const BACKSPACE = '\u007F'
 const CTRL_C = '\u0003';
 const BS = '\u0008';
 const TAB = '\t';
+const ARROW_UP_ENCODED = '%1B%5BA';
+const ARROW_DOWN_ENCODED = '%1B%5BB';
+const historyFile = `${MicroManagerBaseDir}/history.json`;
 
 type Processor = (chunk: string) => void;
 let currentProcessor: Processor = lineProcessor;
 
-let currentLine = '';
-let curColumn = 1;
-// let reader: InputReader;
 let commands: Command[];
+let history: string[];
+
+const line = new Line();
 
 /**
  * Init
@@ -72,11 +134,13 @@ function printHelp() {
 function handleLine(line: string): Promise<any> {
   const parts = line.split(" ");
   if (parts[0] === 'help') {
+    history.push('help');
     printHelp();
     return Promise.resolve();
   }
   const command = getCommand(parts[0]);
   if (command) {
+    history.push(command.name);
     return command.execute(parts.slice(1));
   } else {
     console.log(`🤷  unknown command ${parts[0]} ... use 'help' to get the available commands`);
@@ -84,30 +148,21 @@ function handleLine(line: string): Promise<any> {
   }
 }
 
-function newLine() {
-  stdout.write(blue('>'));
-  curColumn++;
-}
 
 function getPossibleCommands(startingWith: string): Command[] {
-  const result = filter(commands, (command) => S(command.name).startsWith(startingWith));
-  // if(S('help').startsWith(startingWith) {
-  //   result.push()
-  // }
+  const result = filter(commands, (command) => command.name.startsWith(startingWith));
   return result;
 }
 
 function completionHelp() {
-  const possibleCommands = getPossibleCommands(currentLine);
+  const possibleCommands = getPossibleCommands(line.content);
   if (possibleCommands.length === 0) return;
   if (possibleCommands.length === 1) {
     const name = possibleCommands[0].name;
-    const whatIsLeft = name.length - currentLine.length;
+    const whatIsLeft = name.length - line.content.length;
     if (whatIsLeft > 0) {
-      stdout.write(name.substr(currentLine.length));
+      line.write(name.substr(line.content.length));
     }
-    currentLine = name;
-    curColumn = name.length + 2;
     return;
   }
   stdout.write(LF);
@@ -115,45 +170,52 @@ function completionHelp() {
     stdout.write(command.name);
     stdout.write(LF);
   });
-  stdout.write(blue('>'));
-  stdout.write(currentLine);
+  line.newCommandLine(line.content);
 }
 
 function lineProcessor(chunk: string): void {
   if (chunk === CR || chunk == LF) {
     stdout.write('\n');
-    handleLine(currentLine).then(() => {
-      currentLine = '';
-      curColumn = 1;
-      newLine();
+    handleLine(line.content).then(() => {
+      line.newCommandLine();
     });
   } else if (chunk === BACKSPACE) {
-    if (currentLine.length > 0) {
-      currentLine = currentLine.substr(0, currentLine.length - 1);
-      process.stdout.write(`\u001b[${curColumn - 1}G`);
-      process.stdout.write('\u001b[K');
-      curColumn--;
-    }
+    line.backspace();
   } else if (chunk === TAB) {
     completionHelp();
-  } else if (encodeURI(chunk) === '%1B%5BA' || encodeURI(chunk) === '%1B%5BB') {
+  } else if (encodeURI(chunk) === ARROW_UP_ENCODED) {
+    if (history.length > 0) {
+      line.replaceCurrenteLine(history[history.length - 1]);
+    }
+
+  } else if (encodeURI(chunk) === ARROW_DOWN_ENCODED) {
 
   } else {
-    currentLine += chunk;
-    curColumn++;
-    process.stdout.write(chunk);
+    line.write(chunk);
   }
   // console.log('1:', encodeURI(chunk));
   if (chunk === CTRL_C) {
-    // reader.onCancel();
-    process.exit(0);
+    stop();
   }
 
 }
 
-export function start() {
-  newLine();
-  stdin.on('data', (chunk: string) => {
-    currentProcessor(chunk);
+export function start(): Promise<any> {
+  return readFile(historyFile, [])
+    .then((savedHistory) => {
+      log(`history: `, savedHistory);
+      history = savedHistory;
+    })
+    .then(() => {
+      line.newCommandLine();
+      stdin.on('data', (chunk: string) => {
+        currentProcessor(chunk);
+      });
+    });
+}
+export function stop(): Promise<void> {
+  return writeFile(historyFile, history).then(() => {
+    log('\n👋  Goodbye');
+    process.exit(0);
   });
 }
