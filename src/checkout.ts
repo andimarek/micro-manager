@@ -1,20 +1,37 @@
-import { Repository, Config, Project, getRepositoryByIdSafe } from './domain';
+import { getRepos, Repository, Config, Project, getRepositoryByIdSafe } from './domain';
 import { exec, execFile } from 'child_process';
 import { log } from './log';
 import { newTmpDir, executeCommand, makePath, addToArray } from './util';
-import { gitClone } from './git';
+import { gitClone, gitCloneInWorkspace } from './git';
 import { flatMap, keys, map, reduce, uniqBy, find, constant, forEach } from 'lodash';
+import { mapLimit, ensureDirExists } from './util';
+
+const maxParallel = 5;
 
 export function checkoutIntoTmp(repos: Iterable<Repository>): Promise<{ [repoId: string]: string }> {
   const promises: Promise<string>[] = [];
   const pathByRepoId: { [repoId: string]: string } = {};
-  for (const repo of repos) {
+  return mapLimit(repos, maxParallel, (repo) => {
     const tmpDir = newTmpDir();
     log.debug(`checking out ${repo.url} into ${tmpDir}`);
     pathByRepoId[repo.id] = tmpDir;
-    promises.push(gitClone(repo.url, tmpDir));
-  }
-  return Promise.all(promises).then(constant(pathByRepoId));
+    return gitClone(repo.url, tmpDir);
+  }).then(constant(pathByRepoId));
+}
+
+export function checkoutIntoWorkspace(workspace: string): Promise<void> {
+  const repos = getRepos();
+  const promises: Promise<any>[] = [];
+  return ensureDirExists(workspace).then(() => {
+    log.debug(`checking out all ${repos.length} repos into: ${workspace}`);
+    return mapLimit(repos, maxParallel, (repo) => {
+      log.debug(`checking out ${repo.url}`);
+      return gitCloneInWorkspace(repo.url, workspace);
+    }).then( () => {
+        log.success(`checkout finished`);
+    });
+  });
+
 }
 
 export type PathByProjectId = { [projectId: string]: { projectPath: string, repoPath: string } };
