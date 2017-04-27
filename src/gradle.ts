@@ -95,7 +95,7 @@ function parseDependenciesForOneConfiguration(lines: string[], startIx: number, 
         const optionalRemark = curLine.indexOf(' (*)', realVersionStart);
         const realVersion = curLine.substring(realVersionStart, optionalRemark > 0 ? optionalRemark : curLine.length);
         const dependency = configuration.dependencies[configuration.dependencies.length - 1];
-        log.debug(`replacing dependency version ${dependency.version} with real version ${realVersion}`);
+        // log.debug(`replacing dependency version ${dependency.version} with real version ${realVersion}`);
         dependency.version = realVersion;
       }
     }

@@ -1,9 +1,0 @@
-{
-  "rootPath:": "~/dev/projects",
-  "remotes": [
-    {
-      "name": "local",
-      "url": "localhost"
-    }
-  ]
-}
