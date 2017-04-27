@@ -3,9 +3,8 @@ import { spawn } from 'child_process';
 import { noop } from 'lodash';
 import { gitCloneInWorkspace } from '../git';
 import { log } from '../log';
-import { ensureDirExists } from '../util';
+import { ensureDirExists, mapLimit } from '../util';
 import { Command } from '../inputreader';
-import { mapLimit } from 'async';
 
 const command: Command = {
   name: 'checkout',
@@ -26,24 +25,28 @@ function checkout(targetDir: string): Promise<void> {
   const config = getConfig();
   const promises: Promise<any>[] = [];
   return ensureDirExists(targetDir).then(() => {
-    log.debug(`checking out all repos into: ${targetDir}`);
-    return new Promise<void>((resolve, reject) => {
-      mapLimit(repos, 5, async (repo, callback) => {
-        log.debug(`checking out ${repo.url}`);
-        try {
-          await gitCloneInWorkspace(repo.url, targetDir);
-          callback();
-        } catch (error) {
-          callback(error);
-        }
-      }, (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          log.success(`checkout finished`);
-          resolve();
-        }
-      });
+    log.debug(`checking out all ${repos.length} repos into: ${targetDir}`);
+    return mapLimit(repos, maxParallel, (repo) => {
+      log.debug(`checking out ${repo.url}`);
+      return gitCloneInWorkspace(repo.url, targetDir);
     });
+    //   return new Promise<void>((resolve, reject) => {
+    //     mapLimit(repos, 5, async (repo, callback) => {
+    //       log.debug(`checking out ${repo.url}`);
+    //       try {
+    //         await gitCloneInWorkspace(repo.url, targetDir);
+    //         callback();
+    //       } catch (error) {
+    //         callback(error);
+    //       }
+    //     }, (error) => {
+    //       if (error) {
+    //         reject(error);
+    //       } else {
+    //         log.success(`checkout finished`);
+    //         resolve();
+    //       }
+    //     });
+    //   });
   });
 }

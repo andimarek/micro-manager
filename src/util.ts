@@ -3,6 +3,27 @@ import { exec, execFile, execSync } from 'child_process';
 import * as fs from 'fs';
 import { assertTrue } from './assert';
 import { log } from './log';
+import { mapLimit as asyncMapLimit } from 'async';
+
+// interface AsyncResultCallback<T, E> { (err?: E, result?: T): void; }
+interface AsyncIterator<T, R> { (item: T): Promise<R>; }
+// mapLimit<T, R, E>(arr: Dictionary<T>, limit: number, iterator: AsyncResultIterator<T, R, E>, callback?: AsyncResultArrayCallback<R, E>): void;
+// mapLimit<T, R, E>(arr: T[] | IterableIterator<T>, limit: number, iterator: AsyncResultIterator<T, R, E>, callback?: AsyncResultArrayCallback<R, E>): void;
+export function mapLimit<T, R>(arr: T[] | IterableIterator<T>, limit: number, iterator: AsyncIterator<T, R>): Promise<(R | undefined)[]> {
+  return new Promise<(R | undefined)[]>((resolve, reject) => {
+    asyncMapLimit<T, R, any>(arr, limit, (item: T, callback) => {
+      iterator(item)
+        .then((result) => callback(null, result))
+        .catch((error) => callback(error));
+    }, (error, result) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
 
 export function sleep(seconds: number): void {
   execSync(`sleep ${seconds}`);
@@ -56,7 +77,7 @@ export function executeCommand(command: string, args: string[], path: string): P
   const result = new Promise((resolve, reject) => {
     execFile(command, args, { cwd: path }, (error, stdout, stderr) => {
       if (error) {
-        reject({error, stdout, stderr});
+        reject({ error, stdout, stderr });
         return;
       }
       resolve(stdout);
