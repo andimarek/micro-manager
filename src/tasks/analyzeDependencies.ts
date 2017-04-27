@@ -1,10 +1,14 @@
 import { getData, getRepositoryById, Project, PROJECT_TYPE_GRADLE, GradleComplexType } from '../domain';
-import { filter, forEach } from 'lodash';
+import { identity, pickBy, uniqBy, mapValues, sortBy, reduce, map, filter, forEach } from 'lodash';
 import { log } from '../log';
 import { checkoutAllProjects } from '../checkout';
 import { getDependencies, Configuration } from '../gradle';
-import { addToArray } from '../util';
+import { firstElement, addToArray, mapLimit } from '../util';
 
+interface ProjectAndDependencies {
+  project: Project;
+  configurations: Configuration[]
+}
 export function findDifferentVersions(): Promise<any> {
   const projects = getData().projects;
   const gradleProjects = filter<Project>(projects, (project) => {
@@ -13,42 +17,63 @@ export function findDifferentVersions(): Promise<any> {
   log.debug(`found ${gradleProjects.length} gradle projects`);
   return checkoutAllProjects(gradleProjects)
     .then((pathByProjectId) => {
-      return Promise.all(gradleProjects.map((project) => getDependencies(pathByProjectId[project.id].projectPath, pathByProjectId[project.id].repoPath, project)));
+      return mapLimit(gradleProjects, 5, (project) => {
+        return getDependencies(pathByProjectId[project.id].projectPath, pathByProjectId[project.id].repoPath, project)
+          .then((configurations) => {
+            return {
+              project,
+              configurations
+            };
+          });
+      });
     })
     .then((dependencies) => {
       log(`dependencies of all projects:`, dependencies);
-      checkVersion(dependencies);
+      checkVersion(dependencies!);
     });
 }
 
-function checkVersion(configurations: Configuration[][]) {
-  const relevantConfigs = getRuntimeDependencies(configurations);
-  const versionByArtifact: { [name: string]: Set<string> } = {};
-  for (const config of relevantConfigs) {
-    for (const dependency of config.dependencies) {
-      const depName = dependency.groupId + ':' + dependency.artifactId;
-      if (!versionByArtifact[depName]) {
-        versionByArtifact[depName] = new Set<string>();
-      }
-      versionByArtifact[depName].add(dependency.version);
+function checkVersion(dependencies: ProjectAndDependencies[]) {
+  const relevantDependencies = getRuntimeDependencies(dependencies);
+  type VersionsByArtifact = { [name: string]: { project: Project, version: string, groupId: string }[] };
+  const versionByArtifact: VersionsByArtifact = reduce(relevantDependencies, (acc, dependency) => {
+    forEach(dependency.configurations, (config) => {
+      forEach(config.dependencies, (artifact) => {
+        const artifactName = artifact.groupId + ':' + artifact.artifactId;
+        acc[artifactName] = (acc[artifactName] || []);
+        acc[artifactName].push({ project: dependency.project, version: artifact.version, groupId: artifact.groupId });
+      });
+    });
+    return acc;
+  }, {} as VersionsByArtifact);
+
+  const removedDuplicted = mapValues(versionByArtifact, (infos, artifactName) => {
+    return uniqBy(infos, (info) => info.version);
+  });
+
+  const artifactsWithMultipleVersions = <VersionsByArtifact>pickBy(removedDuplicted, (infos) => infos.length > 1); 
+  const array = map(artifactsWithMultipleVersions, (infos, name) => {
+    return {
+      name,
+      groupId: infos[0].groupId,
+      infos
     }
-  }
-  forEach(versionByArtifact, (versions, name) => {
-    if (versions.size === 1) {
-      return;
-    }
-    log(`${name} is used in different versions: `, versions);
+  });
+
+  const sorted = sortBy(array, ({groupId}) => groupId);
+  forEach(sorted, ({name, infos}) => {
+    const versions = map(infos, (info) => info.version);
+    const projects = map(infos, (info) => info.project.name);
+    log(`${name} is used in different versions: `, versions, ' in this projects: ', projects);
   });
 }
 
-function getRuntimeDependencies(configurations: Configuration[][]): Configuration[] {
+function getRuntimeDependencies(dependencies: ProjectAndDependencies[]): { project: Project, configurations: Configuration[] }[] {
   const result: Configuration[] = [];
-  for (const configArray of configurations) {
-    for (const config of configArray) {
-      if (config.name === 'runtime' || config.name === 'runtimeOnly') {
-        result.push(config);
-      }
-    }
-  }
-  return result;
+  return map(dependencies, ({ project, configurations }) => {
+    return {
+      project,
+      configurations: filter(configurations, (config) => config.name === 'runtime' || config.name === 'runtimeOnly')
+    };
+  });
 }

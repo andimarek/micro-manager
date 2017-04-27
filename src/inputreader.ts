@@ -55,6 +55,7 @@ class Line {
 
   replaceCurrenteLine(newLine: string) {
     this.clearLine(2);
+    this.content = '';
     this.curColumn = 2;
     this.write(newLine);
   }

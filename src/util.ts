@@ -8,7 +8,7 @@ import { mapLimit as asyncMapLimit } from 'async';
 export interface Dictionary<T> { [key: string]: T; }
 export interface AsyncIterator<T, R> { (item: T): Promise<R>; }
 
-export function mapLimit<T, R>(arr: Iterable<T> | Dictionary<T>, limit: number, iterator: AsyncIterator<T, R>): Promise<(R | undefined)[]> {
+export function mapLimit<T, R>(arr: Iterable<T> | Dictionary<T>, limit: number, iterator: AsyncIterator<T, R>): Promise<(R)[]> {
   return new Promise<(R | undefined)[]>((resolve, reject) => {
     asyncMapLimit<T, R, any>(<any>arr, limit, (item: T, callback) => {
       iterator(item)
@@ -23,6 +23,11 @@ export function mapLimit<T, R>(arr: Iterable<T> | Dictionary<T>, limit: number, 
     });
   });
 }
+
+export function firstElement<T>(set: Set<T>): T {
+  return set.values().next().value;
+}
+
 
 export function sleep(seconds: number): void {
   execSync(`sleep ${seconds}`);

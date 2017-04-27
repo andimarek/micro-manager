@@ -42,7 +42,7 @@ export function openServer(): Promise<any> {
 }
 
 function handlePush(otherData: Data): Promise<void> {
-  log(`received data to merge:`, otherData);
+  log.debug(`received data to merge:`, otherData);
   const mergedData = mergeData(otherData);
   if (mergedData) {
     return setData(mergedData);
