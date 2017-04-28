@@ -1,5 +1,4 @@
 import { executeCommand, assertFileExists } from './util';
-import * as S from 'string';
 import { log } from './log';
 import * as fs from 'fs';
 
@@ -50,7 +49,7 @@ export function ensureFileIsCommited(repoPath: string, fileInRepo: string): Prom
       if (!status) {
         return;
       }
-      if (S(status).startsWith('1') || S(status).startsWith('2')) {
+      if (status.startsWith('1') || status.startsWith('2')) {
         return gitAdd(repoPath, fileInRepo).then(() => gitCommit(repoPath, 'backup'));
       } else {
         throw new Error(`unsupported status ${status}`);

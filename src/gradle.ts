@@ -1,7 +1,6 @@
 import { executeCommand, executeCommandInShell, makePath } from './util';
 import { log } from './log';
 import { assertTrue } from './assert';
-import * as S from 'string';
 import { Project, GradleComplexType } from './domain';
 import { isObject } from 'lodash';
 
@@ -51,7 +50,7 @@ function parse(output: string): Configuration[] {
 
 function searchForStart(lines: string[]): number {
   let curIx = 0;
-  while (curIx < lines.length && !S(lines[curIx]).startsWith('---------------------------')) {
+  while (curIx < lines.length && !lines[curIx].startsWith('---------------------------')) {
     curIx++;
   }
   assertTrue(curIx < lines.length, `unexptected format`);
