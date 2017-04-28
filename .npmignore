@@ -2,3 +2,4 @@ webpack.config.js
 tsconfig.json
 .vscode
 test
+dist/**/*.d.ts
