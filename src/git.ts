@@ -36,7 +36,7 @@ export function ensureFileIsUnderVC(repoPath: string, fileInRepo: string): Promi
   return assertFileExists(repoPath + '/' + fileInRepo)
     .then(() => gitStatus(repoPath, fileInRepo))
     .then((status: string) => {
-      if (status && S(status).startsWith('? ')) {
+      if (status && status.startsWith('? ')) {
         return gitAdd(repoPath, fileInRepo);
       }
     });
