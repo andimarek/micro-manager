@@ -12,7 +12,7 @@
     "url": "https://github.com/andimarek/micro-manager/issues"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "yarn run build",
     "build": "webpack",
     "run": "yarn run build && node dist/mm.js",
     "clean": "rm -rf dist"
