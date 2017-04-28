@@ -22,5 +22,6 @@ module.exports = {
   },
   plugins: [
     // new webpack.IgnorePlugin(/data.json/),
+    new webpack.BannerPlugin({banner: '#!/usr/bin/env node', raw: true })
   ],
 };

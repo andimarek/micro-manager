@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "manage microservies",
   "main": "dist/mm.js",
+  "bin": {
+    "micro-manager": "./dist/mm.js"
+  },
   "preferGlobal": true,
   "homepage": "https://github.com/andimarek/micro-manager",
   "bugs": {
