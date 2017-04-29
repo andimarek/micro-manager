@@ -1,6 +1,17 @@
 import { red, green, magenta } from 'chalk';
 import { map } from 'lodash';
 import { inspect } from 'util';
+import * as winston from 'winston';
+import { MicroManagerBaseDir } from './constants';
+
+winston.configure({
+  transports: [
+    new (winston.transports.File)({
+      filename: `${MicroManagerBaseDir}/micro-manager.log`,
+      json: false
+    })
+  ]
+});
 
 export interface Logger {
   (message, ...optional: any[]): void;
@@ -8,27 +19,38 @@ export interface Logger {
   success(message, ...optional: any[]): void;
   debug(message, ...optional: any[]): void;
 }
+
+
 function defaultLog(message: string, ...optional: any[]) {
   console.log.apply(null, [message].concat(optional));
+  winston.log('info', toString(message, optional));
 }
 
 function logError(message: string, ...optional: any[]) {
   console.log.apply(null, [red(message)].concat(optional));
+  winston.log('error', toString(message, optional));
 }
 
 function logSuccess(message: string, ...optional: any[]) {
   console.log.apply(null, [green(message)].concat(optional));
+  winston.log('info', toString(message, optional));
 }
 
 function debug(message: string, ...optional: any[]) {
   console.log.apply(null, [magenta('[DEBUG] ')].concat(message).concat(optional));
+  winston.log('debug', toString(message, optional));
+}
+
+function toString(message: string, ...optional: any[]) {
+  const optionalParts = map(optional, (toPrint) => inspect(toPrint));
+  return message + optionalParts.join();
 }
 
 export class Printer {
   public value: string = '';
 
   print(message?: string, ...optional: any[]): void {
-    if(!message) {
+    if (!message) {
       this.value += '\n';
       return;
     }
