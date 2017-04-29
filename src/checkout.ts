@@ -8,7 +8,7 @@ import { mapLimit, ensureDirExists } from './util';
 
 const maxParallel = 5;
 
-export function checkoutIntoTmp(repos: Iterable<Repository>): Promise<{ [repoId: string]: string }> {
+function checkoutIntoTmp(repos: Repository[]): Promise<{ [repoId: string]: string }> {
   const promises: Promise<string>[] = [];
   const pathByRepoId: { [repoId: string]: string } = {};
   return mapLimit(repos, maxParallel, (repo) => {
@@ -37,16 +37,20 @@ export function checkoutIntoWorkspace(workspace: string): Promise<{ success: boo
 export type PathByProjectId = { [projectId: string]: { projectPath: string, repoPath: string } };
 
 export function checkoutAllProjects(projects: Project[]): Promise<PathByProjectId> {
-  const repoByProjectId: { [projectId: string]: Repository }[] = [];
+  const repoByProjectId: { [projectId: string]: Repository } = {}
   const projectsByRepoId: { [repoId: string]: Project[] } = {};
-  const allRepos: Set<Repository> = new Set<Repository>();
+  const allReposWithDuplicates: Repository[] = [];
+
   for (const project of projects) {
     const repo = getRepositoryByIdSafe(project.repositoryId);
-    addToArray(projectsByRepoId, repo.id, project);
     repoByProjectId[project.id] = repo;
-    allRepos.add(repo);
+
+    addToArray(projectsByRepoId, repo.id, project);
+    allReposWithDuplicates.push(repo);
   }
-  return checkoutIntoTmp(allRepos).then((pathByRepoId) => {
+  const uniqueRepos = uniqBy(allReposWithDuplicates, (repo) => repo.id);
+  log(`checking out ${uniqueRepos.length} repos`);
+  return checkoutIntoTmp(uniqueRepos).then((pathByRepoId) => {
     log.debug(`checked out all repos`);
     type RepoPathProject = [string, Project];
     const repoIds = keys(pathByRepoId);

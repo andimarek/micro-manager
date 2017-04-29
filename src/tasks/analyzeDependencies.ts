@@ -10,6 +10,7 @@ interface ProjectAndDependencies {
   project: Project;
   configurations: Configuration[]
 }
+
 export function checkForDifferentVersions(): Promise<{ success: boolean, output: string }> {
   const projects = getData().projects;
   const gradleProjects = filter<Project>(projects, (project) => {
