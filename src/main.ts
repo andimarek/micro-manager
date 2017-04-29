@@ -11,6 +11,7 @@ import config from './commands/config';
 import data from './commands/data';
 import exit from './commands/exit';
 import analyzeDeps from './commands/analyzeDeps';
+import remote from './commands/remote';
 
 process.on('uncaughtException', (exception) => {
   log.error(`uncaught exception ${exception} ... exiting now`);
@@ -36,7 +37,8 @@ const commands: Command[] = [
   config,
   data,
   exit,
-  analyzeDeps
+  analyzeDeps,
+  remote
 ];
 setCommands(commands);
 

@@ -74,6 +74,9 @@ let config: Config;
  * 
  */
 
+export function getDataDir() {
+  return dataDir;
+}
 export async function init(): Promise<any> {
 
   await ensureDirExists(MicroManagerBaseDir);
@@ -199,14 +202,6 @@ function checkForDuplicateProjectIds() {
   }
 }
 
-// function validateData() {
-//   for (const repo of data.repos) {
-//     assertDefined(repo.id, `repo is invalid. id is missing ${repo}`)
-//     assertDefined(repo.url, `repo is invalid. url is missing ${repo}`)
-//     assertDefined(repo.type, `repo is invalid. type is missing ${repo}`)
-//   }
-//   assertTrue(checkForUniqueIds(data.repos));
-// }
 
 function checkForUniqueIds(array: { id: string }[]): boolean {
   return uniqBy(array, 'id').length !== array.length;

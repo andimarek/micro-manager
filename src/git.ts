@@ -1,14 +1,35 @@
 import { executeCommand, assertFileExists } from './util';
 import { log } from './log';
 import * as fs from 'fs';
+import { includes } from 'lodash';
+
+export function setOrigin(repoPath: string, url: string): Promise<any> {
+  return getRemotes(repoPath)
+    .then((remotes: string[]) => {
+      log.debug(`remote repos:`, remotes);
+      if (includes(remotes,'origin')) {
+        throw new Error('there is already a origin remote');
+      }
+    })
+    .then(() => {
+      return executeCommand('git', ['remote', 'add', 'origin', url ], repoPath);
+    });
+}
+
+export function getRemotes(repoPath: string): Promise<string[]> {
+  return executeCommand('git', ['remote', 'show'], repoPath)
+    .then((output) => {
+      return output.split('\n');
+    });
+}
 
 export function gitClone(url: string, path: string): Promise<string> {
   return executeCommand('git', ['clone', '--progress', url, path], path);
 }
 
-export function gitCloneInWorkspace(url:string, workspace: string): Promise<string> {
+export function gitCloneInWorkspace(url: string, workspace: string): Promise<string> {
   return executeCommand('git', ['clone', '--progress', url], workspace);
-} 
+}
 
 export function gitInit(path: string): Promise<any> {
   return executeCommand('git', ['init'], path);

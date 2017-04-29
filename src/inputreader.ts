@@ -136,6 +136,7 @@ function printHelp() {
 }
 
 function executeCommand(command: Command, args: string[]): Promise<boolean> {
+  log.debug('executing command', command.name);
   return command.execute(args)
     .then(({ success, output }) => {
       if (success) {
