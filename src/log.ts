@@ -8,7 +8,8 @@ winston.configure({
   transports: [
     new (winston.transports.File)({
       filename: `${MicroManagerBaseDir}/micro-manager.log`,
-      json: false
+      json: false,
+      level: 'debug'
     })
   ]
 });
