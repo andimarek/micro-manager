@@ -24,27 +24,31 @@ export interface Logger {
 
 function defaultLog(message: string, ...optional: any[]) {
   console.log.apply(null, [message].concat(optional));
-  winston.log('info', toString(message, optional));
+  winston.log('info', toString(message, ...optional));
 }
 
 function logError(message: string, ...optional: any[]) {
   console.log.apply(null, [red(message)].concat(optional));
-  winston.log('error', toString(message, optional));
+  winston.log('error', toString(message, ...optional));
 }
 
 function logSuccess(message: string, ...optional: any[]) {
   console.log.apply(null, [green(message)].concat(optional));
-  winston.log('info', toString(message, optional));
+  winston.log('info', toString(message, ...optional));
 }
 
 function debug(message: string, ...optional: any[]) {
-  console.log.apply(null, [magenta('[DEBUG] ')].concat(message).concat(optional));
-  winston.log('debug', toString(message, optional));
+  // console.log.apply(null, [magenta('[DEBUG] ')].concat(message).concat(optional));
+  winston.log('debug', toString(message, ...optional));
 }
 
-function toString(message: string, ...optional: any[]) {
+function toString(message: string, ...optional: any[]): string {
+  if (optional.length === 0) {
+    return message;
+  }
   const optionalParts = map(optional, (toPrint) => inspect(toPrint));
-  return message + optionalParts.join();
+  const result = message + optionalParts.join();
+  return result;
 }
 
 export class Printer {
