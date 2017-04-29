@@ -9,6 +9,7 @@ For example: "Check out all projects" or "Validate that all projects use the sam
 
 - [Overview](#overview)
 - [Code of Conduct](#code-of-conduct)
+- [Installation](#installation)
 - [License](#license)
 
 ### Overview
@@ -21,6 +22,14 @@ And because they all should be loosely coupled there is often no "natural" place
 Please note that this project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md).
 By contributing to this project (commenting or opening PR/Issues etc) you are agreeing to follow this conduct, so please
 take the time to read it.
+
+### Installation
+
+micro-manager is avaialabe on [npm](https://www.npmjs.com). To install it execute:
+
+```shell
+npm install -g micro-manager
+```
 
 ### License
 
