@@ -3,3 +3,5 @@ tsconfig.json
 .vscode
 test
 dist/**/*.d.ts
+.travis.yml
+.npmignore
