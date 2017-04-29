@@ -46,7 +46,7 @@ function toString(message: string, ...optional: any[]): string {
   if (optional.length === 0) {
     return message;
   }
-  const optionalParts = map(optional, (toPrint) => inspect(toPrint));
+  const optionalParts = map(optional, (toPrint) => inspect(toPrint, { depth: undefined }));
   const result = message + optionalParts.join();
   return result;
 }
@@ -59,7 +59,7 @@ export class Printer {
       this.value += '\n';
       return;
     }
-    const optionalPrints = map(optional, (toPrint) => inspect(toPrint));
+    const optionalPrints = map(optional, (toPrint) => inspect(toPrint, { depth: undefined }));
     this.value += message + optionalPrints.join() + '\n';
   }
 }
