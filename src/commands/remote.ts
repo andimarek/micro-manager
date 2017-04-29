@@ -1,11 +1,11 @@
 import { Command } from '../inputreader';
 import { push } from '../data-exchange';
-import { getConfig, Config, getDataDir } from '../domain';
-import { find } from 'lodash';
+import { getConfig, Config, getDataDir, refreshData } from '../domain';
+import { find, constant } from 'lodash';
 import { log } from '../log';
-import { setOrigin } from '../git';
+import { setOrigin, pullOrigin } from '../git';
 
-const command: Command = {
+const setOriginCommand: Command = {
   name: 'remote-set-origin',
   arguments: [
     { name: 'remote-url' }
@@ -15,5 +15,16 @@ const command: Command = {
   }
 };
 
+const pullOriginCommand: Command = {
+  name: 'remote-pull',
+  arguments: [
+  ],
+  execute(args: string[]) {
+    return pullOrigin(getDataDir())
+      .then(() => refreshData())
+      .then(constant({ success: true }));
+  }
+};
 
-export default command;
+
+export default [setOriginCommand, pullOriginCommand];

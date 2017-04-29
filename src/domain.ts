@@ -77,6 +77,12 @@ let config: Config;
 export function getDataDir() {
   return dataDir;
 }
+
+export async function refreshData(){
+  data = <Data> await readFile(dataFileFullPath, { repos: [], projects: [] } as Data);
+  log.debug('refreshed data:', data);
+}
+
 export async function init(): Promise<any> {
 
   await ensureDirExists(MicroManagerBaseDir);

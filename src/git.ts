@@ -3,6 +3,7 @@ import { log } from './log';
 import * as fs from 'fs';
 import { includes } from 'lodash';
 
+
 export function setOrigin(repoPath: string, url: string): Promise<any> {
   return getRemotes(repoPath)
     .then((remotes: string[]) => {
@@ -90,8 +91,8 @@ function gitStatus(path: string, file?: string): Promise<string> {
   });
 }
 
-function gitPull(path: string): void {
-  const gitPull = executeCommand('git', ['pull', 'origin'], path);
+export function pullOrigin(repoPath: string): Promise<string> {
+  return executeCommand('git', ['pull', 'origin', 'master'], repoPath);
 }
 
 function isClean(path: string): Promise<boolean> {
