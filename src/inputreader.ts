@@ -15,8 +15,13 @@ export interface InputReader {
 export interface Command {
   name: string;
   arguments: CommandArgument[];
-  execute: (args: string[]) => Promise<void>;
+  execute: (args: string[]) => Promise<CommandResult>;
 }
+export interface CommandResult {
+  success: boolean;
+  output?: string;
+}
+
 export interface CommandArgument {
   name: string;
 }
@@ -130,6 +135,25 @@ function printHelp() {
   });
 }
 
+function executeCommand(command: Command, args: string[]): Promise<any> {
+  return command.execute(args)
+    .then(({ success, output }) => {
+      if (success) {
+        log.success('succcessful');
+      } else {
+        log.error('command failed');
+      }
+      if (output) {
+        log(`output:`);
+        log(output);
+      }
+    })
+    .catch((error) => {
+      log.error('exception', error);
+    });
+
+}
+
 function handleLine(line: string): Promise<any> {
   const parts = line.split(" ");
   if (parts[0] === 'help') {
@@ -140,7 +164,7 @@ function handleLine(line: string): Promise<any> {
   const command = getCommand(parts[0]);
   if (command) {
     history.push(command.name);
-    return command.execute(parts.slice(1));
+    return executeCommand(command, parts.slice(1));
   } else {
     console.log(`🤷  unknown command ${parts[0]} ... use 'help' to get the available commands`);
     return Promise.resolve();
@@ -201,7 +225,7 @@ function lineProcessor(chunk: string): Promise<void> {
   // console.log('1:', encodeURI(chunk));
 }
 
-export function start(commandToExecute?:string): Promise<any> {
+export function start(commandToExecute?: string): Promise<any> {
   return readFile(historyFile, [])
     .then((savedHistory) => {
       history = savedHistory;

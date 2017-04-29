@@ -1,16 +1,16 @@
 import { getData, getRepositoryById, Project, PROJECT_TYPE_GRADLE, GradleComplexType } from '../domain';
-import { groupBy, identity, pickBy, uniqBy, mapValues, sortBy, reduce, map, filter, forEach } from 'lodash';
-import { log } from '../log';
+import { size, groupBy, identity, pickBy, uniqBy, mapValues, sortBy, reduce, map, filter, forEach } from 'lodash';
+import { log, Printer } from '../log';
 import { checkoutAllProjects } from '../checkout';
 import { getDependencies, Configuration } from '../gradle';
 import { firstElement, addToArray, mapLimit } from '../util';
-import {red, blue} from 'chalk';
+import { red, blue } from 'chalk';
 
 interface ProjectAndDependencies {
   project: Project;
   configurations: Configuration[]
 }
-export function findDifferentVersions(): Promise<any> {
+export function checkForDifferentVersions(): Promise<{ success: boolean, output: string }> {
   const projects = getData().projects;
   const gradleProjects = filter<Project>(projects, (project) => {
     return project.type === PROJECT_TYPE_GRADLE || (<GradleComplexType>project.type).name === PROJECT_TYPE_GRADLE;
@@ -30,13 +30,14 @@ export function findDifferentVersions(): Promise<any> {
     })
     .then((dependencies) => {
       log(`dependencies of all projects:`, dependencies);
-      checkVersion(dependencies!);
+      return checkVersion(dependencies!);
     });
 }
 
-function checkVersion(dependencies: ProjectAndDependencies[]) {
+type VersionsByArtifact = { [name: string]: { project: Project, version: string, artifactId: string, groupId: string }[] };
+
+function checkVersion(dependencies: ProjectAndDependencies[]): { success: boolean, output?: string } {
   const relevantDependencies = getRuntimeDependencies(dependencies);
-  type VersionsByArtifact = { [name: string]: { project: Project, version: string, artifactId: string, groupId: string }[] };
   const versionByArtifact: VersionsByArtifact = reduce(relevantDependencies, (acc, dependency) => {
     forEach(dependency.configurations, (config) => {
       forEach(config.dependencies, (artifact) => {
@@ -52,7 +53,15 @@ function checkVersion(dependencies: ProjectAndDependencies[]) {
     return uniqBy(infos, (info) => info.version);
   });
 
-  const artifactsWithMultipleVersions = <VersionsByArtifact>pickBy(removedDuplicted, (infos) => infos.length > 1); 
+  const artifactsWithMultipleVersions = <VersionsByArtifact>pickBy(removedDuplicted, (infos) => infos.length > 1);
+
+  if (size(artifactsWithMultipleVersions) === 0) {
+    return { success: true };
+  }
+  return { success: false, output: generateOutput(artifactsWithMultipleVersions) };
+}
+
+function generateOutput(artifactsWithMultipleVersions: VersionsByArtifact): string {
   const array = map(artifactsWithMultipleVersions, (infos, name) => {
     return {
       name,
@@ -61,18 +70,19 @@ function checkVersion(dependencies: ProjectAndDependencies[]) {
       infos
     }
   });
-
-  const sorted = sortBy(array, ({groupId}) => groupId);
-  const byGroupId = groupBy(array, ({groupId}) => groupId);
+  const sorted = sortBy(array, ({ groupId }) => groupId);
+  const byGroupId = groupBy(array, ({ groupId }) => groupId);
+  const printer = new Printer();
   forEach(byGroupId, (withSameGroupId, groupId) => {
-    log(red(groupId + ':'));
-    forEach(withSameGroupId, ({name, infos, artifactId}) => {
+    printer.print(red(groupId + ':'));
+    forEach(withSameGroupId, ({ name, infos, artifactId }) => {
       const versions = map(infos, (info) => info.version);
       const projects = map(infos, (info) => info.project.name);
-      log(`${artifactId} is used in different versions: `, versions, ' in these projects: ', projects);
+      printer.print(`${artifactId} is used in different versions: `, versions, ' in these projects: ', projects);
     });
-    log(``);
+    printer.print();
   });
+  return printer.value;
 }
 
 function getRuntimeDependencies(dependencies: ProjectAndDependencies[]): { project: Project, configurations: Configuration[] }[] {

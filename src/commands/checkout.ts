@@ -4,7 +4,7 @@ import { noop } from 'lodash';
 import { gitCloneInWorkspace } from '../git';
 import { log } from '../log';
 import { ensureDirExists, mapLimit } from '../util';
-import { Command } from '../inputreader';
+import { Command, CommandResult } from '../inputreader';
 import {checkoutIntoWorkspace} from '../checkout';
 
 const command: Command = {
@@ -12,7 +12,7 @@ const command: Command = {
   arguments: [
     { name: "dir" }
   ],
-  execute(args: string[]): Promise<void> {
+  execute(args: string[]): Promise<CommandResult> {
     return checkoutIntoWorkspace(args[0]);
   }
 };

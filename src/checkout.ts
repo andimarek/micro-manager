@@ -19,7 +19,7 @@ export function checkoutIntoTmp(repos: Iterable<Repository>): Promise<{ [repoId:
   }).then(constant(pathByRepoId));
 }
 
-export function checkoutIntoWorkspace(workspace: string): Promise<void> {
+export function checkoutIntoWorkspace(workspace: string): Promise<{ success: boolean }> {
   const repos = getRepos();
   const promises: Promise<any>[] = [];
   return ensureDirExists(workspace).then(() => {
@@ -27,8 +27,8 @@ export function checkoutIntoWorkspace(workspace: string): Promise<void> {
     return mapLimit(repos, maxParallel, (repo) => {
       log.debug(`checking out ${repo.url}`);
       return gitCloneInWorkspace(repo.url, workspace);
-    }).then( () => {
-        log.success(`checkout finished`);
+    }).then(() => {
+      return { success: true };
     });
   });
 

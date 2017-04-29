@@ -1,4 +1,6 @@
 import { red, green, magenta } from 'chalk';
+import { map } from 'lodash';
+import { inspect } from 'util';
 
 export interface Logger {
   (message, ...optional: any[]): void;
@@ -21,6 +23,20 @@ function logSuccess(message: string, ...optional: any[]) {
 function debug(message: string, ...optional: any[]) {
   console.log.apply(null, [magenta('[DEBUG] ')].concat(message).concat(optional));
 }
+
+export class Printer {
+  public value: string = '';
+
+  print(message?: string, ...optional: any[]): void {
+    if(!message) {
+      this.value += '\n';
+      return;
+    }
+    const optionalPrints = map(optional, (toPrint) => inspect(toPrint));
+    this.value += message + optionalPrints.join() + '\n';
+  }
+}
+
 
 const log: Logger = <Logger>defaultLog;
 log.error = logError;

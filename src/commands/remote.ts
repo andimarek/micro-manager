@@ -10,7 +10,7 @@ const command: Command = {
     { name: '' }
   ],
   execute(args: string[]) {
-    return Promise.resolve();
+    return Promise.resolve({ success: true });
   }
 };
 

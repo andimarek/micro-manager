@@ -1,7 +1,7 @@
-import {Command} from '../inputreader';
-import {getData, Data} from '../domain';
-import {find} from 'lodash';
-import {log } from '../log';
+import { Command, CommandResult } from '../inputreader';
+import { getData, Data } from '../domain';
+import { find } from 'lodash';
+import { log } from '../log';
 
 const command: Command = {
   name: 'data',
@@ -15,7 +15,7 @@ const command: Command = {
 function run(args: string[]) {
   const data = getData();
   log('current data:\n', data);
-  return Promise.resolve();
+  return Promise.resolve({ success: true });
 }
 
 export default command;
