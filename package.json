@@ -2,7 +2,6 @@
   "name": "micro-manager",
   "version": "0.1.0",
   "description": "manage microservies",
-  "main": "dist/mm.js",
   "bin": {
     "micro-manager": "./dist/mm.js"
   },
@@ -11,13 +10,21 @@
   "bugs": {
     "url": "https://github.com/andimarek/micro-manager/issues"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/andimarek/micro-manager"
+  },
   "scripts": {
     "test": "yarn run build",
     "build": "webpack",
     "run": "yarn run build && node dist/mm.js",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "prepublish": "yarn run clean && yarn run build"
   },
-  "keywords": [],
+  "keywords": [
+    "microservice",
+    "microservices"
+  ],
   "author": {
     "name": "Andreas Marek",
     "email": "andimarek@fastmail.fm",
