@@ -41,5 +41,5 @@ const commands: Command[] = [
 setCommands(commands);
 
 initDomain()
-  .then(openServer)
+  // .then(openServer)
   .then(() => startReadingInput(program.execute));
