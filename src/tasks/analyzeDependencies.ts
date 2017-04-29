@@ -76,7 +76,7 @@ function generateOutput(artifactsWithMultipleVersions: VersionsByArtifact): stri
   const printer = new Printer();
   printer.print(`found different versions used in different projects:`);
   forEach(byGroupId, (withSameGroupId, groupId) => {
-    printer.print(red(groupId + ':'));
+    printer.print(groupId + ':');
     forEach(withSameGroupId, ({ name, infos, artifactId }) => {
       const versions = map(infos, (info) => info.version);
       const projects = map(infos, (info) => info.project.name);
