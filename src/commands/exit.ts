@@ -13,7 +13,7 @@ const command: Command = {
 };
 
 function run(args: string[]) {
-  return stop().then(constant({ success: true }));
+  return stop({ exitCode: 0, silent: false }).then(constant({ success: true }));
 }
 
 export default command;

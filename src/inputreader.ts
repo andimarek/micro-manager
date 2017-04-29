@@ -135,7 +135,7 @@ function printHelp() {
   });
 }
 
-function executeCommand(command: Command, args: string[]): Promise<any> {
+function executeCommand(command: Command, args: string[]): Promise<boolean> {
   return command.execute(args)
     .then(({ success, output }) => {
       if (success) {
@@ -147,6 +147,7 @@ function executeCommand(command: Command, args: string[]): Promise<any> {
         log(`output:`);
         log(output);
       }
+      return success;
     })
     .catch((error) => {
       log.error('exception', error);
@@ -154,12 +155,12 @@ function executeCommand(command: Command, args: string[]): Promise<any> {
 
 }
 
-function handleLine(line: string): Promise<any> {
+function handleLine(line: string): Promise<boolean> {
   const parts = line.split(" ");
   if (parts[0] === 'help') {
     history.push('help');
     printHelp();
-    return Promise.resolve();
+    return Promise.resolve(true);
   }
   const command = getCommand(parts[0]);
   if (command) {
@@ -167,7 +168,7 @@ function handleLine(line: string): Promise<any> {
     return executeCommand(command, parts.slice(1));
   } else {
     console.log(`🤷  unknown command ${parts[0]} ... use 'help' to get the available commands`);
-    return Promise.resolve();
+    return Promise.resolve(false);
   }
 }
 
@@ -196,31 +197,32 @@ function completionHelp() {
   line.newCommandLine(line.content);
 }
 
-function lineProcessor(chunk: string): Promise<void> {
+function lineProcessor(chunk: string): Promise<boolean> {
   if (chunk === CR || chunk == LF) {
     stdout.write('\n');
-    return handleLine(line.content).then(() => {
+    return handleLine(line.content).then((success) => {
       line.newCommandLine();
+      return success;
     });
   } else if (chunk === BACKSPACE) {
     line.backspace();
-    return Promise.resolve();
+    return Promise.resolve(true);
   } else if (chunk === TAB) {
     completionHelp();
-    return Promise.resolve();
+    return Promise.resolve(true);
   } else if (encodeURI(chunk) === ARROW_UP_ENCODED) {
     if (history.length > 0) {
       line.replaceCurrenteLine(history[history.length - 1]);
     }
-    return Promise.resolve();
+    return Promise.resolve(true);
   } else if (encodeURI(chunk) === ARROW_DOWN_ENCODED) {
-    return Promise.resolve();
+    return Promise.resolve(true);
   } if (chunk === CTRL_C) {
-    stop();
-    return Promise.resolve();
+    stop({ exitCode: 0, silent: false });
+    return Promise.resolve(true);
   } else {
     line.write(chunk);
-    return Promise.resolve();
+    return Promise.resolve(true);
   }
   // console.log('1:', encodeURI(chunk));
 }
@@ -237,13 +239,15 @@ export function start(commandToExecute?: string): Promise<any> {
       });
       if (commandToExecute) {
         line.write(commandToExecute);
-        lineProcessor(CR).then(stop);
+        lineProcessor(CR).then((success) => stop({ exitCode: success ? 0 : 1, silent: true }));
       }
     });
 }
-export function stop(): Promise<void> {
+export function stop({ exitCode, silent }: { exitCode: number, silent: boolean }): Promise<void> {
   return writeFile(historyFile, history).then(() => {
-    log('\n👋  Goodbye');
-    process.exit(0);
+    if (!silent) {
+      log('\n👋  Goodbye');
+    }
+    process.exit(exitCode);
   });
 }

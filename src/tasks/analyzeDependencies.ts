@@ -29,7 +29,7 @@ export function checkForDifferentVersions(): Promise<{ success: boolean, output:
       });
     })
     .then((dependencies) => {
-      log(`dependencies of all projects:`, dependencies);
+      log.debug(`dependencies of all projects:`, dependencies);
       return checkVersion(dependencies!);
     });
 }
@@ -73,6 +73,7 @@ function generateOutput(artifactsWithMultipleVersions: VersionsByArtifact): stri
   const sorted = sortBy(array, ({ groupId }) => groupId);
   const byGroupId = groupBy(array, ({ groupId }) => groupId);
   const printer = new Printer();
+  printer.print(`found different versions used in different projects:`);
   forEach(byGroupId, (withSameGroupId, groupId) => {
     printer.print(red(groupId + ':'));
     forEach(withSameGroupId, ({ name, infos, artifactId }) => {
