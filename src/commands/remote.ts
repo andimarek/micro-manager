@@ -16,7 +16,7 @@ const setOriginCommand: Command = {
 };
 
 const pullOriginCommand: Command = {
-  name: 'remote-pull',
+  name: 'remote-pull-origin',
   arguments: [
   ],
   execute(args: string[]) {

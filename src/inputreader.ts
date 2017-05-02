@@ -1,7 +1,7 @@
 import { ReadStream, WriteStream } from "tty";
-import { find, filter } from 'lodash';
+import { forEach, find, filter } from 'lodash';
 import { blue } from 'chalk';
-import { readFile, writeFile } from './util';
+import { mapLimit, readFile, writeFile } from './util';
 import { MicroManagerBaseDir } from './constants';
 import { log } from './log';
 
@@ -168,7 +168,7 @@ function handleLine(line: string): Promise<boolean> {
     history.push(command.name);
     return executeCommand(command, parts.slice(1));
   } else {
-    console.log(`🤷  unknown command ${parts[0]} ... use 'help' to get the available commands`);
+    log(`🤷  unknown command ${parts[0]} ... use 'help' to get the available commands`);
     return Promise.resolve(false);
   }
 }
@@ -239,8 +239,19 @@ export function start(commandToExecute?: string): Promise<any> {
         lineProcessor(chunk);
       });
       if (commandToExecute) {
-        line.write(commandToExecute);
-        lineProcessor(CR).then((success) => stop({ exitCode: success ? 0 : 1, silent: true }));
+        const commands = commandToExecute.split(';');
+        mapLimit(commands, 1, (command) => {
+          line.write(command);
+          return lineProcessor(CR).then((success) => {
+            if (success) {
+              return Promise.resolve(true);
+            } else {
+              return stop({ exitCode: 1, silent: true }).then(() => false);
+            }
+          });
+        }).then((results) => {
+          return stop({exitCode: 0, silent: true})
+        });
       }
     });
 }
