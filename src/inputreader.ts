@@ -53,7 +53,9 @@ class Line {
   }
 
   write(toPrint: string) {
-    stdin.write(toPrint);
+    if (stdin.isTTY) {
+      (<ReadStream>stdin).write(toPrint);
+    }
     this.content += toPrint;
     this.curColumn += toPrint.length;
   }
@@ -103,18 +105,23 @@ const line = new Line();
  * Init
  */
 
-if (!process.stdin.isTTY) {
-  throw new Error('stdin is not TTY');
-}
+// if (!process.stdin.isTTY) {
+//   throw new Error('stdin is not TTY');
+// }
 
-if (!process.stdout.isTTY) {
-  throw new Error('stdout is not TTY');
-}
+// if (!process.stdout.isTTY) {
+//   throw new Error('stdout is not TTY');
+// }
 
-const stdin = <ReadStream>process.stdin;
+const stdin = process.stdin;
 stdin.setEncoding('utf8');
-stdin.setRawMode(true);
-const stdout = <WriteStream>process.stdout;
+if (stdin.isTTY) {
+  (<ReadStream>stdin).setRawMode(true);
+}
+// const stdin = <ReadStream>process.stdin;
+// const stdout = <WriteStream>process.stdout;
+const stdout = process.stdout;
+
 
 
 export function setCommands(_commands: Command[]) {
@@ -250,7 +257,7 @@ export function start(commandToExecute?: string): Promise<any> {
             }
           });
         }).then((results) => {
-          return stop({exitCode: 0, silent: true})
+          return stop({ exitCode: 0, silent: true })
         });
       }
     });

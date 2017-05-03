@@ -33,13 +33,18 @@ export function gitCloneInWorkspace(url: string, workspace: string): Promise<str
 }
 
 export function gitInit(path: string): Promise<any> {
-  return executeCommand('git', ['init'], path);
+  return executeCommand('git', ['init'], path)
+}
+
+export function setEmailAndUser(path:string, email:string, user:string): Promise<any> {
+  return executeCommand('git', ['config', 'user.email', email], path)
+  .then( () => executeCommand('git',['config', 'user.name', user], path));
 }
 
 export function ensureGitRepo(path: string): Promise<any> {
   return gitStatus(path).catch((error) => {
     if (error && error.error && error.error.message && (<string>error.error.message).indexOf('Not a git repository')) {
-      return gitInit(path);
+      return gitInit(path).then( () => setEmailAndUser(path, 'micro-manager@example.com', 'micro-manager'));
     } else {
       throw error;
     }
