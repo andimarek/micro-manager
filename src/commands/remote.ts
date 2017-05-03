@@ -3,7 +3,7 @@ import { push } from '../data-exchange';
 import { getConfig, Config, getDataDir, refreshData } from '../domain';
 import { find, constant } from 'lodash';
 import { log } from '../log';
-import { setOrigin, pullOrigin } from '../git';
+import { setOrigin, pullOrigin, checkoutOrigin, gitFetchOrigin } from '../git';
 
 const setOriginCommand: Command = {
   name: 'remote-set-origin',
@@ -11,7 +11,8 @@ const setOriginCommand: Command = {
     { name: 'remote-url' }
   ],
   execute(args: string[]) {
-    return setOrigin(getDataDir(), args[0]);
+    return setOrigin(getDataDir(), args[0])
+      .then(constant({ success: true }));
   }
 };
 
@@ -20,7 +21,8 @@ const pullOriginCommand: Command = {
   arguments: [
   ],
   execute(args: string[]) {
-    return pullOrigin(getDataDir())
+    return gitFetchOrigin(getDataDir())
+      .then(() => checkoutOrigin(getDataDir(), "masterOrigin"))
       .then(() => refreshData())
       .then(constant({ success: true }));
   }

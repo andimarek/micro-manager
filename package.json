@@ -1,6 +1,6 @@
 {
   "name": "micro-manager",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "manage microservies",
   "bin": {
     "micro-manager": "./dist/mm.js"

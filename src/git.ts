@@ -38,7 +38,7 @@ export function gitInit(path: string): Promise<any> {
 
 export function ensureGitRepo(path: string): Promise<any> {
   return gitStatus(path).catch((error) => {
-    if (error && (<string>error.message).indexOf('Not a git repository')) {
+    if (error && error.error && error.error.message && (<string>error.error.message).indexOf('Not a git repository')) {
       return gitInit(path);
     } else {
       throw error;
@@ -95,6 +95,13 @@ export function pullOrigin(repoPath: string): Promise<string> {
   return executeCommand('git', ['pull', 'origin', 'master'], repoPath);
 }
 
+export function gitFetchOrigin(repoPath: string): Promise<string> {
+  return executeCommand('git', ['fetch', 'origin'], repoPath);
+}
+
+export function checkoutOrigin(repoPath: string, branchName: string): Promise<string> {
+  return executeCommand('git', ['checkout',`-b`, branchName, 'origin/master'], repoPath);
+}
 function isClean(path: string): Promise<boolean> {
   const gitStatus = executeCommand('git', ['status', '--porcelain=v2'], path).then((stdout) => {
     return stdout === '';
