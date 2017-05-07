@@ -38,7 +38,7 @@ export function checkForDifferentVersions(): Promise<{ success: boolean, output:
 
 type VersionsByArtifact = { [name: string]: { project: Project, version: string, artifactId: string, groupId: string }[] };
 
-function checkVersion(dependencies: ProjectAndDependencies[]): { success: boolean, output?: string } {
+export function checkVersion(dependencies: ProjectAndDependencies[]): { success: boolean, output?: string } {
   const relevantDependencies = getRuntimeDependencies(dependencies);
   const versionByArtifact: VersionsByArtifact = reduce(relevantDependencies, (acc, dependency) => {
     forEach(dependency.configurations, (config) => {
