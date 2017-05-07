@@ -60,10 +60,10 @@ export function checkVersion(dependencies: ProjectAndDependencies[]): { success:
   if (size(artifactsWithMultipleVersions) === 0) {
     return { success: true };
   }
-  return { success: false, output: generateOutput(artifactsWithMultipleVersions) };
+  return { success: false, output: createInfoMessage(artifactsWithMultipleVersions) };
 }
 
-function generateOutput(artifactsWithMultipleVersions: VersionsByArtifact): string {
+export function createInfoMessage(artifactsWithMultipleVersions: VersionsByArtifact): string {
   const array = map(artifactsWithMultipleVersions, (infos, name) => {
     return {
       name,
