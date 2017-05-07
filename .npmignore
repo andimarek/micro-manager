@@ -5,3 +5,5 @@ test
 dist/**/*.d.ts
 .travis.yml
 .npmignore
+out
+*.log

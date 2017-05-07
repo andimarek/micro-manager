@@ -15,10 +15,11 @@
     "url": "https://github.com/andimarek/micro-manager"
   },
   "scripts": {
-    "test": "yarn run build",
+    "pretest": "tsc -p tsconfig.test.json",
+    "test": "mocha out/**/*.js",
     "build": "webpack",
     "run": "yarn run build && node dist/mm.js",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist out"
   },
   "keywords": [
     "microservice",
@@ -32,10 +33,12 @@
   "license": "MIT",
   "devDependencies": {
     "@types/async": "^2.0.40",
+    "@types/chai": "^3.5.2",
     "@types/chalk": "^0.4.31",
     "@types/commander": "^2.9.0",
     "@types/fs-extra": "^2.1.0",
     "@types/lodash": "^4.14.62",
+    "@types/mocha": "^2.2.41",
     "@types/node": "^7.0.12",
     "@types/string": "^0.0.28",
     "@types/tmp": "^0.0.32",
@@ -43,10 +46,13 @@
     "@types/xml2js": "^0.0.33",
     "async": "^2.3.0",
     "awesome-typescript-loader": "^3.1.2",
+    "chai": "^3.5.0",
     "chalk": "^1.1.3",
     "commander": "^2.9.0",
     "fs-extra": "^2.1.2",
     "lodash": "^4.17.4",
+    "mocha": "^3.3.0",
+    "ramda": "^0.23.0",
     "tmp": "^0.0.31",
     "typescript": "^2.3.2",
     "webpack": "^2.3.3",

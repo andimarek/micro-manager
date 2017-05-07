@@ -6,7 +6,7 @@ import { getDependencies, Configuration } from '../gradle';
 import { firstElement, addToArray, mapLimit } from '../util';
 import { red, blue } from 'chalk';
 
-interface ProjectAndDependencies {
+export interface ProjectAndDependencies {
   project: Project;
   configurations: Configuration[]
 }
@@ -87,7 +87,7 @@ function generateOutput(artifactsWithMultipleVersions: VersionsByArtifact): stri
   return printer.value;
 }
 
-function getRuntimeDependencies(dependencies: ProjectAndDependencies[]): { project: Project, configurations: Configuration[] }[] {
+export function getRuntimeDependencies(dependencies: ProjectAndDependencies[]): { project: Project, configurations: Configuration[] }[] {
   const result: Configuration[] = [];
   return map(dependencies, ({ project, configurations }) => {
     return {

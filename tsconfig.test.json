@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "outDir": "out",
     "sourceMap": false,
     "noImplicitAny": false,
     "strictNullChecks": true,
@@ -10,5 +11,8 @@
       "es2017"
     ],
     "declaration": false
-  }
+  },
+  "include": [
+    "./test/**/*.ts"
+  ]
 }
