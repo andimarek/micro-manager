@@ -5,6 +5,7 @@ import { checkoutAllProjects } from '../checkout';
 import { getDependencies, Configuration } from '../gradle';
 import { firstElement, addToArray, mapLimit } from '../util';
 import { red, blue } from 'chalk';
+import * as R from 'ramda';
 
 export interface ProjectAndDependencies {
   project: Project;
@@ -88,11 +89,7 @@ function generateOutput(artifactsWithMultipleVersions: VersionsByArtifact): stri
 }
 
 export function getRuntimeDependencies(dependencies: ProjectAndDependencies[]): { project: Project, configurations: Configuration[] }[] {
-  const result: Configuration[] = [];
-  return map(dependencies, ({ project, configurations }) => {
-    return {
-      project,
-      configurations: filter(configurations, (config) => config.name === 'runtime' || config.name === 'runtimeOnly')
-    };
-  });
+  const configuration = R.lensProp('configurations')
+  const isRuntimeConfig = config => config.name === 'runtime' || config.name === 'runtimeOnly';
+  return R.map(R.over(configuration, R.filter(isRuntimeConfig)))(dependencies);
 }
