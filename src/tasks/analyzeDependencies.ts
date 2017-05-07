@@ -89,7 +89,7 @@ function generateOutput(artifactsWithMultipleVersions: VersionsByArtifact): stri
 }
 
 export function getRuntimeDependencies(dependencies: ProjectAndDependencies[]): { project: Project, configurations: Configuration[] }[] {
-  const configuration = R.lensProp('configurations')
+  const configurations = R.lensProp('configurations')
   const isRuntimeConfig = config => config.name === 'runtime' || config.name === 'runtimeOnly';
-  return R.map(R.over(configuration, R.filter(isRuntimeConfig)))(dependencies);
+  return R.map(R.over(configurations, R.filter(isRuntimeConfig)))(dependencies);
 }
