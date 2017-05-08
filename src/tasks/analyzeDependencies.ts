@@ -47,18 +47,23 @@ export function checkVersion(dependencies: ProjectAndDependencies[]): { success:
   const dependenciesLens = R.lensProp('dependencies');
   const artifactName = (artifact: Artifact) => artifact.groupId + ':' + artifact.artifactId;
 
-  const flattenArtifacts = R.map(
+  const flatten = R.map(
     R.over(configurationsLens, R.chain(R.view(dependenciesLens)))
-  )(relevantDependencies);
-
+  );
   const projectAndArtifact = R.chain(
     ({ project, configurations }) => R.map((artifact) => ({ project, artifact }))(configurations)
-  )(flattenArtifacts);
+  );
+  const groupedByArtifactName = R.groupBy(R.compose(artifactName, R.prop('artifact')));
+  const uniqArtifacts = R.map(R.uniqBy(({ artifact }) => artifact.version));
+  const keepMultipleVersions = R.filter(R.compose(R.gt(R.__, 1), R.length));
 
-  const groupedByArtifactName: VersionsByArtifact = R.groupBy(R.compose(artifactName, R.prop('artifact')))(projectAndArtifact)
-
-  const uniqArtifacts: VersionsByArtifact = R.map(R.uniqBy(({ artifact }) => artifact.version))(groupedByArtifactName);
-  const withDifferentVersions: VersionsByArtifact = R.filter(R.compose(R.gt(R.__, 1), R.length))(uniqArtifacts);
+  const withDifferentVersions = R.pipe(
+    flatten,
+    projectAndArtifact,
+    groupedByArtifactName,
+    uniqArtifacts,
+    keepMultipleVersions
+  )(relevantDependencies);
 
   if (size(withDifferentVersions) === 0) {
     return { success: true };
