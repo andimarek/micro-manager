@@ -36,7 +36,6 @@ export function checkForDifferentVersions(): Promise<{ success: boolean, output:
     });
 }
 
-// type VersionsByArtifact = { [name: string]: { project: Project, version: string, artifactId: string, groupId: string }[] };
 type VersionsByArtifact = { [name: string]: { project: Project, artifact: Artifact}[] };
 
 export function checkVersion(dependencies: ProjectAndDependencies[]): { success: boolean, output?: string } {
