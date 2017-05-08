@@ -2,8 +2,8 @@ import { getData, getRepositoryById, Project, PROJECT_TYPE_GRADLE, GradleComplex
 import { size, groupBy, identity, pickBy, uniqBy, mapValues, sortBy, reduce, map, filter, forEach } from 'lodash';
 import { log, Printer } from '../log';
 import { checkoutAllProjects } from '../checkout';
-import { getDependencies, Configuration } from '../gradle';
-import { firstElement, addToArray, mapLimit } from '../util';
+import { Artifact, getDependencies, Configuration } from '../gradle';
+import { inspect, firstElement, addToArray, mapLimit } from '../util';
 import { red, blue } from 'chalk';
 import * as R from 'ramda';
 
@@ -36,39 +36,42 @@ export function checkForDifferentVersions(): Promise<{ success: boolean, output:
     });
 }
 
-type VersionsByArtifact = { [name: string]: { project: Project, version: string, artifactId: string, groupId: string }[] };
+// type VersionsByArtifact = { [name: string]: { project: Project, version: string, artifactId: string, groupId: string }[] };
+type VersionsByArtifact = { [name: string]: { project: Project, artifact: Artifact}[] };
 
 export function checkVersion(dependencies: ProjectAndDependencies[]): { success: boolean, output?: string } {
   const relevantDependencies = getRuntimeDependencies(dependencies);
-  const versionByArtifact: VersionsByArtifact = reduce(relevantDependencies, (acc, dependency) => {
-    forEach(dependency.configurations, (config) => {
-      forEach(config.dependencies, (artifact) => {
-        const artifactName = artifact.groupId + ':' + artifact.artifactId;
-        acc[artifactName] = (acc[artifactName] || []);
-        acc[artifactName].push({ project: dependency.project, artifactId: artifact.artifactId, version: artifact.version, groupId: artifact.groupId });
-      });
-    });
-    return acc;
-  }, {} as VersionsByArtifact);
 
-  const removedDuplicted = mapValues(versionByArtifact, (infos, artifactName) => {
-    return uniqBy(infos, (info) => info.version);
-  });
+  const configurationsLens = R.lensProp('configurations');
+  const projectLens = R.lensProp('project');
+  const dependenciesLens = R.lensProp('dependencies');
+  const artifactName = (artifact: Artifact) => artifact.groupId + ':' + artifact.artifactId;
 
-  const artifactsWithMultipleVersions = <VersionsByArtifact>pickBy(removedDuplicted, (infos) => infos.length > 1);
+  const flattenArtifacts = R.map(
+    R.over(configurationsLens, R.chain(R.view(dependenciesLens)))
+  )(relevantDependencies);
 
-  if (size(artifactsWithMultipleVersions) === 0) {
+  const projectAndArtifact = R.chain(
+    ({ project, configurations }) => R.map((artifact) => ({ project, artifact }))(configurations)
+  )(flattenArtifacts);
+
+  const groupedByArtifactName: VersionsByArtifact = R.groupBy(R.compose(artifactName, R.prop('artifact')))(projectAndArtifact)
+
+  const uniqArtifacts: VersionsByArtifact = R.map(R.uniqBy(({ artifact }) => artifact.version))(groupedByArtifactName);
+  const withDifferentVersions: VersionsByArtifact = R.filter(R.compose(R.gt(R.__, 1), R.length))(uniqArtifacts);
+
+  if (size(withDifferentVersions) === 0) {
     return { success: true };
   }
-  return { success: false, output: createInfoMessage(artifactsWithMultipleVersions) };
+  return { success: false, output: createInfoMessage(withDifferentVersions) };
 }
 
 export function createInfoMessage(artifactsWithMultipleVersions: VersionsByArtifact): string {
   const array = map(artifactsWithMultipleVersions, (infos, name) => {
     return {
       name,
-      groupId: infos[0].groupId,
-      artifactId: infos[0].artifactId,
+      groupId: infos[0].artifact.groupId,
+      artifactId: infos[0].artifact.artifactId,
       infos
     }
   });
@@ -79,7 +82,7 @@ export function createInfoMessage(artifactsWithMultipleVersions: VersionsByArtif
   forEach(byGroupId, (withSameGroupId, groupId) => {
     printer.print(groupId + ':');
     forEach(withSameGroupId, ({ name, infos, artifactId }) => {
-      const versions = map(infos, (info) => info.version);
+      const versions = map(infos, (info) => info.artifact.version);
       const projects = map(infos, (info) => info.project.name);
       printer.print(`${artifactId} is used in different versions: `, versions, ' in these projects: ', projects);
     });

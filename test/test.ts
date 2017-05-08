@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { Project, Repository } from '../src/domain';
 import { createInfoMessage, getRuntimeDependencies, ProjectAndDependencies, checkVersion } from '../src/tasks/analyzeDependencies';
-import { Configuration, Dependency } from '../src/gradle';
+import { Configuration, Artifact } from '../src/gradle';
 
 const repo: Repository = {
   id: '1',
@@ -9,7 +9,7 @@ const repo: Repository = {
   url: 'example.com'
 }
 
-const project: Project = {
+const project1: Project = {
   id: '1',
   name: 'project1',
   path: '',
@@ -26,61 +26,75 @@ const project2: Project = {
 };
 
 describe('analyze dependencies', () => {
-  const runtimeConfig = {
-    dependencies: [{
-      groupId: 'groupId',
-      artifactId: 'artifactId',
-      version: '1.0',
-    }],
-    desc: '',
-    name: 'runtime'
-  };
-  const runtimeConfig2 = {
-    dependencies: [{
-      groupId: 'groupId',
-      artifactId: 'artifactId',
-      version: '2.0',
-    }],
-    desc: '',
-    name: 'runtime'
-  }
-  const buildConfig = {
-    dependencies: [{
-      groupId: 'groupId',
-      artifactId: 'artifactId',
-      version: '1.0',
-    }],
-    desc: '',
-    name: 'build'
-  };
-  const projectAndDep: ProjectAndDependencies = {
-    project,
-    configurations: [runtimeConfig, buildConfig]
+  const project1Info: ProjectAndDependencies = {
+    project: project1,
+    configurations: [{
+      desc: '',
+      name: 'runtime',
+      dependencies: [{
+        groupId: 'groupId',
+        artifactId: 'artifactId',
+        version: '1.0',
+      },{
+        groupId: 'com.example',
+        artifactId: 'other',
+        version: '3.0',
+      }
+      ]
+    }, {
+      desc: '',
+      name: 'build',
+      dependencies: [{
+        groupId: 'groupId',
+        artifactId: 'artifactId',
+        version: '1.0',
+      }],
+    },
+    {
+      desc: '',
+      name: 'runtimeOnly',
+      dependencies: [{
+        groupId: 'com.example',
+        artifactId: 'other',
+        version: '3.0',
+      }]
+    }]
   };
 
-  const projectAndDep2: ProjectAndDependencies = {
+  const project2Info: ProjectAndDependencies = {
     project: project2,
-    configurations: [runtimeConfig2]
+    configurations: [{
+      desc: '',
+      name: 'runtime',
+      dependencies: [{
+        groupId: 'groupId',
+        artifactId: 'artifactId',
+        version: '2.0',
+      }, {
+        groupId: 'otherGroupId',
+        artifactId: 'otherArtifact',
+        version: '0.4.0',
+      }],
+    }]
   }
 
   it('checkversion returns error', () => {
     const message = "found different versions used in different projects:\ngroupId:\nartifactId is used in different versions: [ '1.0', '2.0' ],' in these projects: ',[ 'project1', 'project2' ]\n\n";
     const expectedResult = { success: false, output: message };
-    const result = checkVersion([projectAndDep, projectAndDep2]);
+    const result = checkVersion([project1Info, project2Info]);
     expect(result).to.deep.equal(expectedResult);
   });
 
 
   it('checkVersion returns no errors', () => {
     const expectedResult = { success: true };
-    const result = checkVersion([projectAndDep]);
+    const result = checkVersion([project1Info]);
     expect(result).to.deep.equal(expectedResult);
   });
 
   it('getRuntimeDependencies', () => {
-
-    const expectedResult = [{ project, configurations: [runtimeConfig] }]
-    const result = getRuntimeDependencies([projectAndDep]);
+    const expectedResult = [{ project: project1, configurations: [project1Info.configurations[0], project1Info.configurations[2]] }]
+    const result = getRuntimeDependencies([project1Info]);
     expect(result).to.deep.equal(expectedResult);
   });
 });

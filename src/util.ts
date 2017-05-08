@@ -4,6 +4,12 @@ import * as fs from 'fs';
 import { assertTrue } from './assert';
 import { log } from './log';
 import { mapLimit as asyncMapLimit } from 'async';
+import {inspect as nodeInspect} from 'util';
+
+
+export function inspect(toPrint: any): string {
+  return nodeInspect(toPrint, { depth: undefined });
+}
 
 export interface Dictionary<T> { [key: string]: T; }
 export interface AsyncIterator<T, R> { (item: T): Promise<R>; }

@@ -4,7 +4,7 @@ import { assertTrue } from './assert';
 import { Project, GradleComplexType } from './domain';
 import { isObject } from 'lodash';
 
-export interface Dependency {
+export interface Artifact {
   groupId: string;
   artifactId: string;
   version: string;
@@ -13,7 +13,7 @@ export interface Dependency {
 export interface Configuration {
   name: string;
   desc: string;
-  dependencies: Dependency[];
+  dependencies: Artifact[];
 }
 
 export function getDependencies(projectPath: string, repoPath: string, project: Project): Promise<Configuration[]> {
@@ -86,7 +86,7 @@ function parseDependenciesForOneConfiguration(lines: string[], startIx: number, 
     const optionalSpace = curLine.indexOf(' ', start + 2);
     const end = optionalSpace > -1 ? optionalSpace : curLine.length;
     assertTrue(end > 0 && start < end, `unexpected format ${curLine} ... no end`);
-    const dependency = parseDependency(curLine.substring(start + 2, end));
+    const dependency = parseArtifact(curLine.substring(start + 2, end));
     if (dependency) {
       configuration.dependencies.push(dependency);
       if (end > 0 && curLine.indexOf(' -> ', end) > 0) {
@@ -103,7 +103,7 @@ function parseDependenciesForOneConfiguration(lines: string[], startIx: number, 
   return curIx - startIx;
 }
 
-function parseDependency(toParse: string): Dependency | null {
+function parseArtifact(toParse: string): Artifact | null {
   if (toParse === 'project') {
     return null;
   }
