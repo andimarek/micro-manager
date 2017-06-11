@@ -12,9 +12,13 @@ import data from './commands/data';
 import exit from './commands/exit';
 import analyzeDeps from './commands/analyzeDeps';
 import remoteCommands from './commands/remote';
+import addTask from './commands/addTask';
+import { startTaskProcess } from './tasks/taskProcessManager';
+
+import './task-api';
 
 process.on('uncaughtException', (exception) => {
-  log.error(`uncaught exception ${exception} ... exiting now`);
+  log.error(`uncaught exception ${exception} ... exiting now`, exception);
   process.exit(1);
 });
 
@@ -38,10 +42,12 @@ const commands: Command[] = [
   data,
   exit,
   analyzeDeps,
+  addTask,
   ...remoteCommands
 ];
 setCommands(commands);
 
 initDomain()
   // .then(openServer)
-  .then(() => startReadingInput(program.execute));
+  .then(() => startReadingInput(program.execute))
+  .then(() => startTaskProcess());

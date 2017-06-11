@@ -1,0 +1,22 @@
+{
+  "name": "micro-manager-task-api",
+  "version": "0.4.0",
+  "description": "task-api for micro-manager",
+  "types": "task-api.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andimarek/micro-manager.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/andimarek/micro-manager/issues"
+  },
+  "homepage": "https://github.com/andimarek/micro-manager#readme",
+  "dependencies": {
+    "@types/lodash": "^4.14.64"
+  }
+}

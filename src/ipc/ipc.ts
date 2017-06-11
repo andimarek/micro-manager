@@ -1,9 +1,10 @@
 import * as net from 'net';
 import { log } from '../log';
 import { Repository, Data, mergeData, setData, getData } from '../domain';
-import { EventEmitter } from 'events';
-import { IDisposable, Disposable, toDisposable } from './lifecycle';
+import { Emitter, Event } from '../common/event';
+import { IDisposable, Disposable, toDisposable } from '../common/lifecycle';
 import { assertDefined } from '../assert';
+import * as R from 'ramda';
 
 
 
@@ -22,7 +23,7 @@ interface IRawRequest {
 
 interface IRequest {
   raw: IRawRequest;
-  emitter?: EventEmitter;
+  // emitter?: EventEmitter;
   flush?: (() => void) | null;
 }
 
@@ -46,7 +47,7 @@ interface IHandler {
 
 export interface IMessagePassingProtocol {
   send(request: any): void;
-  onMessage(callback: (response: any) => void): void;
+  onMessage(callback: (response: any) => void): IDisposable;
 }
 
 enum State {
@@ -263,48 +264,135 @@ function bufferIndexOf(buffer: Buffer, value: number, start = 0) {
 
   return start;
 }
-class Protocol implements IMessagePassingProtocol {
 
-  private static Boundary = new Buffer([0]);
-  private buffer: Buffer | null;
+export class Protocol implements IMessagePassingProtocol {
 
-  constructor(private socket: net.Socket) {
-    this.buffer = null;
-  }
+  private static _headerLen = 17;
 
-  public send(message: any): void {
-    this.socket.write(JSON.stringify(message));
-    this.socket.write(Protocol.Boundary);
-  }
 
-  public onMessage(callback: (message: any) => void): void {
-    this.socket.on('data', (data: Buffer) => {
-      let lastIndex = 0;
-      let index = 0;
+	private _onMessage = new Emitter<any>();
+  readonly onMessage: Event<any> = this._onMessage.event;
 
-      while ((index = bufferIndexOf(data, 0, lastIndex)) < data.length) {
-        const dataToParse = data.slice(lastIndex, index);
+  constructor(private _socket: net.Socket) {
 
-        if (this.buffer) {
-          callback(JSON.parse(Buffer.concat([this.buffer, dataToParse]).toString('utf8')));
-          this.buffer = null;
-        } else {
-          callback(JSON.parse(dataToParse.toString('utf8')));
+    let chunks: Buffer[] = [];
+    let totalLength = 0;
+
+    const state = {
+      readHead: true,
+      bodyIsJson: false,
+      bodyLen: -1,
+    };
+
+    _socket.on('data', (data: Buffer) => {
+
+      chunks.push(data);
+      totalLength += data.length;
+
+      while (totalLength > 0) {
+
+        if (state.readHead) {
+          // expecting header -> read 17bytes for header
+          // information: `bodyIsJson` and `bodyLen`
+          if (totalLength >= Protocol._headerLen) {
+            const all = Buffer.concat(chunks);
+
+            state.bodyIsJson = all.readInt8(0) === 1;
+            state.bodyLen = all.readInt32BE(1);
+            state.readHead = false;
+
+            const rest = all.slice(Protocol._headerLen);
+            totalLength = rest.length;
+            chunks = [rest];
+
+          } else {
+            break;
+          }
         }
 
-        lastIndex = index + 1;
-      }
+        if (!state.readHead) {
+          // expecting body -> read bodyLen-bytes for
+          // the actual message or wait for more data
+          if (totalLength >= state.bodyLen) {
 
-      if (index - lastIndex > 0) {
-        const dataToBuffer = data.slice(lastIndex, index);
+            const all = Buffer.concat(chunks);
+            let message = all.toString('utf8', 0, state.bodyLen);
+            if (state.bodyIsJson) {
+              message = JSON.parse(message);
+            }
+            this._onMessage.fire(message);
 
-        if (this.buffer) {
-          this.buffer = Buffer.concat([this.buffer, dataToBuffer]);
-        } else {
-          this.buffer = dataToBuffer;
+            const rest = all.slice(state.bodyLen);
+            totalLength = rest.length;
+            chunks = [rest];
+
+            state.bodyIsJson = false;
+            state.bodyLen = -1;
+            state.readHead = true;
+
+          } else {
+            break;
+          }
         }
       }
     });
+  }
+
+
+  public send(message: any): void {
+    
+
+    // [bodyIsJson|bodyLen|message]
+    // |^header^^^^^^^^^^^|^data^^]
+
+    const header = Buffer.alloc(Protocol._headerLen);
+
+    // ensure string
+    if (typeof message !== 'string') {
+      message = JSON.stringify(message);
+      header.writeInt8(1, 0);
+    }
+    const data = Buffer.from(message);
+    header.writeInt32BE(data.length, 1);
+
+    this._writeSoon(header, data);
+  }
+
+  private _writeBuffer = new class {
+
+    private _data: Buffer[] = [];
+    private _totalLength = 0;
+
+    add(head: Buffer, body: Buffer): boolean {
+      const wasEmpty = this._totalLength === 0;
+      this._data.push(head, body);
+      this._totalLength += head.length + body.length;
+      return wasEmpty;
+    }
+
+    take(): Buffer {
+      const ret = Buffer.concat(this._data, this._totalLength);
+      this._data.length = 0;
+      this._totalLength = 0;
+      return ret;
+    }
+  };
+
+  private _writeSoon(header: Buffer, data: Buffer): void {
+    if (this._writeBuffer.add(header, data)) {
+      setImmediate(() => {
+        // return early if socket has been destroyed in the meantime
+        if (this._socket.destroyed) {
+          return;
+        }
+        // we ignore the returned value from `write` because we would have to cached the data
+        // anyways and nodejs is already doing that for us:
+        // > https://nodejs.org/api/stream.html#stream_writable_write_chunk_encoding_callback
+        // > However, the false return value is only advisory and the writable stream will unconditionally
+        // > accept and buffer chunk even if it has not not been allowed to drain.
+        this._socket.write(this._writeBuffer.take());
+      });
+    }
   }
 }
 
@@ -339,7 +427,7 @@ export class Server implements IServer, IDisposable {
   }
 }
 
-export class Client implements IClient, IDisposable{
+export class Client implements IClient, IDisposable {
 
   private ipcClient: IPCClient | null;
   private socket: net.Socket | null;

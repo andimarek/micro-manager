@@ -3,9 +3,12 @@ var webpack = require('webpack');
 
 module.exports = {
   target: 'node',
-  entry: ['./src/main'],
+  entry: {
+    mm:'./src/main',
+    taskProcess: './src/tasks/taskProcess'
+  },
   output: {
-    filename: 'mm.js',
+    filename: '[name].js',
     libraryTarget: 'commonjs',
     path: path.resolve(__dirname, 'dist')
   },
