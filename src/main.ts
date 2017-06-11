@@ -12,7 +12,7 @@ import data from './commands/data';
 import exit from './commands/exit';
 import analyzeDeps from './commands/analyzeDeps';
 import remoteCommands from './commands/remote';
-import addTask from './commands/addTask';
+import loadTasks from './commands/loadTasks';
 import { startTaskProcess } from './tasks/taskProcessManager';
 
 
@@ -41,12 +41,12 @@ const commands: Command[] = [
   data,
   exit,
   analyzeDeps,
-  addTask,
+  loadTasks,
   ...remoteCommands
 ];
 setCommands(commands);
 
 initDomain()
   // .then(openServer)
+  .then(() => startTaskProcess())
   .then(() => startReadingInput(program.execute))
-  .then(() => startTaskProcess());

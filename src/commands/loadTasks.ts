@@ -7,7 +7,7 @@ import { loadTaskFile } from '../tasks/taskProcessManager';
 
 
 const command: Command = {
-  name: 'add-task',
+  name: 'load-tasks',
   arguments: [
     { name: 'path' }
   ],
@@ -18,7 +18,6 @@ const command: Command = {
 
 function execute(args: string[]): Promise<CommandResult> {
   const path = args[0];
-  log.debug('adding new task from ', path);
   loadTaskFile(path);
   return Promise.resolve({success: true});
 }

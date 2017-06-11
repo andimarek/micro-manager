@@ -8,6 +8,7 @@ import { createProxyProtocol } from "../ipc/ipcRemoteCom";
 import { ThreadService } from "../ipc/abstractThreadService";
 import { MainThreadTasksShape, TaskDescription, MainContext, TaskHostContext } from "./taskProtocol";
 import { createMainContextProxyIdentifier } from "../ipc/threadService";
+import { log } from '../log';
 
 
 export let threadService: ThreadService;
@@ -37,49 +38,48 @@ function tryListenOnPipe(): Promise<[Server, string]> {
 class MainThreadTasks implements MainThreadTasksShape {
 
   $registerTask(taskDesc: TaskDescription): void {
-    console.log('registering new task with', taskDesc);
+    log('registering new task: ', taskDesc);
   }
 }
 
-export function startTaskProcess() {
+export function startTaskProcess(): Promise<any> {
   const modulePath = './dist/taskProcess';
-  tryListenOnPipe().then(([server, hook]) => {
-    console.log('hook', hook);
+  return tryListenOnPipe().then(([server, hook]) => {
     const childProcess = fork(modulePath, [hook]);
 
-    const promise = new Promise<IMessagePassingProtocol>((resolve, reject) => {
+    return new Promise<IMessagePassingProtocol>((resolve, reject) => {
       let handle = setTimeout(() => reject('timeout'), 60 * 1000);
       server.on('connection', socket => {
-        console.log('new client connection');
         clearTimeout(handle);
         const protocol = new Protocol(socket);
         resolve(protocol);
       });
-      // }).then(protocol => {
-      // 	return protocol;
 
     }).then(protocol => {
-
-      protocol.onMessage(msg => {
-        console.log('received msg', msg);
-        if (msg === 'ready') {
-          // 1) Host is ready to receive messages, initialize it
-          protocol.send('egal');
-          // return this.createExtHostInitData().then(data => protocol.send(stringify(data)));
-        } else if (msg === 'initialized') {
-          console.log('initialized');
-          // 2) Host is initialized
-          const remoteCom = createProxyProtocol(protocol);
-          threadService = new ThreadService(remoteCom, true);
-          threadService.set(MainContext.MainThreadTasks, new MainThreadTasks());
-        }
-        return undefined;
+      return new Promise<any>((resolve, reject) => {
+        protocol.onMessage(msg => {
+          log.debug('received msg', msg);
+          if (msg === 'ready') {
+            // 1) Host is ready to receive messages, initialize it
+            protocol.send('egal');
+            // return this.createExtHostInitData().then(data => protocol.send(stringify(data)));
+          } else if (msg === 'initialized') {
+            log.debug('task host is initialized');
+            const remoteCom = createProxyProtocol(protocol);
+            threadService = new ThreadService(remoteCom, true);
+            threadService.set(MainContext.MainThreadTasks, new MainThreadTasks());
+            log('task host loaded');
+            resolve();
+          }
+          return undefined;
+        });
       });
     });
   });
 }
 
 export function loadTaskFile(path: string): Promise<any> {
+  log.debug('loading tasks project from ', path);
   const taskHostThreads = threadService.get(TaskHostContext.TaskThreadTasks);
   taskHostThreads.$loadTaskFile(path);
   return Promise.resolve();

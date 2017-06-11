@@ -2,6 +2,7 @@ import {createMainContextProxyIdentifier, createTaskHostContextProxyIdentifier} 
 
 export interface TaskDescription {
   name: string;
+  args: string[];
 }
 
 export abstract class MainThreadTasksShape {

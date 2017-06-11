@@ -10,5 +10,10 @@
       "es2017"
     ],
     "declaration": false
-  }
+  },
+  "include": [
+    "src/**/*",
+    "src/task-api"
+  ]
+
 }

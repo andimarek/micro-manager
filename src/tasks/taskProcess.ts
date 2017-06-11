@@ -21,7 +21,7 @@ const nodeRequire = (path: string): void => {
 // const path = process.argv[2];
 const socketName = process.argv[2];
 
-console.log('starting task process with socket', process.argv[2]);
+// console.log('starting task process with socket', process.argv[2]);
 
 class TaskHostTasks implements TaskThreadTasksShape {
 
@@ -43,7 +43,7 @@ const p = new Promise<IMessagePassingProtocol>((resolve, reject) => {
 
 }).then(protocol => {
 	const first = protocol.onMessage(raw => {
-		console.log('received message', raw);
+		// console.log('received message', raw);
 		first.dispose();
 
 		// const initData = parse(raw);
@@ -59,7 +59,7 @@ const p = new Promise<IMessagePassingProtocol>((resolve, reject) => {
 		// 	mainThreadTasks.$registerTask({ name: 'some task' });
 		// }, 2000);
 
-		console.log('sending initialized');
+		// console.log('sending initialized');
 		protocol.send('initialized');
 	});
 	protocol.send('ready');
