@@ -15,7 +15,6 @@ import remoteCommands from './commands/remote';
 import addTask from './commands/addTask';
 import { startTaskProcess } from './tasks/taskProcessManager';
 
-import './task-api';
 
 process.on('uncaughtException', (exception) => {
   log.error(`uncaught exception ${exception} ... exiting now`, exception);

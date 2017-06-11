@@ -7,7 +7,6 @@
 import { IManyHandler, IRemoteCom } from './ipcRemoteCom';
 import { ProxyIdentifier, IThreadService } from './threadService';
 
-// declare var Proxy:any; // TODO@TypeScript
 
 export abstract class AbstractThreadService implements IManyHandler {
 
@@ -35,7 +34,6 @@ export abstract class AbstractThreadService implements IManyHandler {
 
 	get<T>(identifier: ProxyIdentifier<T>): T {
 		if (!this._proxies[identifier.id]) {
-			console.log('creating new proxy for', identifier.methodNames);
 			this._proxies[identifier.id] = this._createProxy(identifier.id, identifier.methodNames);
 		}
 		return this._proxies[identifier.id];

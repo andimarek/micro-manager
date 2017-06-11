@@ -6,9 +6,11 @@ import { tmpdir } from 'os';
 import { IMessagePassingProtocol, Protocol } from "../ipc/ipc";
 import { createProxyProtocol } from "../ipc/ipcRemoteCom";
 import { ThreadService } from "../ipc/abstractThreadService";
-import { MainThreadTasksShape, TaskDescription, MainContext } from "./taskProtocol";
+import { MainThreadTasksShape, TaskDescription, MainContext, TaskHostContext } from "./taskProtocol";
 import { createMainContextProxyIdentifier } from "../ipc/threadService";
 
+
+export let threadService: ThreadService;
 
 function generateRandomPipeName(): string {
   const randomSuffix = generateUuid();
@@ -68,11 +70,17 @@ export function startTaskProcess() {
           console.log('initialized');
           // 2) Host is initialized
           const remoteCom = createProxyProtocol(protocol);
-          const threadService = new ThreadService(remoteCom, true);
+          threadService = new ThreadService(remoteCom, true);
           threadService.set(MainContext.MainThreadTasks, new MainThreadTasks());
         }
         return undefined;
       });
     });
   });
+}
+
+export function loadTaskFile(path: string): Promise<any> {
+  const taskHostThreads = threadService.get(TaskHostContext.TaskThreadTasks);
+  taskHostThreads.$loadTaskFile(path);
+  return Promise.resolve();
 }

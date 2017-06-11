@@ -1,7 +1,7 @@
-export interface TaskConfig {
+interface TaskConfig {
     name: string;
 }
-export interface TaskCallback {
+interface TaskCallback {
     (): Promise<any>;
 }
-export declare function registerTask(taskConfig: TaskConfig, callback: TaskCallback): string;
+declare function registerTask(taskConfig: TaskConfig, callback: TaskCallback): string;

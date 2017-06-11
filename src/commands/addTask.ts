@@ -3,14 +3,8 @@ import { pull } from '../data-exchange';
 import { getConfig, Config } from '../domain';
 import { find } from 'lodash';
 import { log } from '../log';
+import { loadTaskFile } from '../tasks/taskProcessManager';
 
-const nodeRequire = (path: string): void => {
-  try {
-    eval(`require('${path}');`);
-  } catch (e) {
-    log('exception ', e);
-  }
-};
 
 const command: Command = {
   name: 'add-task',
@@ -25,8 +19,8 @@ const command: Command = {
 function execute(args: string[]): Promise<CommandResult> {
   const path = args[0];
   log.debug('adding new task from ', path);
-  nodeRequire(path);
-  return Promise.resolve({ success: true });
+  loadTaskFile(path);
+  return Promise.resolve({success: true});
 }
 
 export default command;

@@ -162,7 +162,6 @@ export interface IRemoteCom {
 }
 
 export function createProxyProtocol(protocol: IMessagePassingProtocol): IRemoteCom {
-	console.log('create proxy protocol');
 	let rpc = createRPC(sendDelayed);
 	let bigHandler: IManyHandler | null = null;
 	let invokedHandlers: { [req: string]: Promise<any>; } = Object.create(null);
