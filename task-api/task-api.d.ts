@@ -4,4 +4,8 @@ interface TaskConfig {
 interface TaskCallback {
     (): Promise<any>;
 }
-declare function registerTask(taskConfig: TaskConfig, callback: TaskCallback): string;
+
+interface TaskApi {
+    registerTask(taskConfig: TaskConfig, callback: TaskCallback);
+}
+declare const taskApi: TaskApi;
