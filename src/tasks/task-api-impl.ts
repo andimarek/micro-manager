@@ -27,7 +27,7 @@ logger.debug = (message: string, ...optional: any[]): void => {
   mainThreadTasks.$logDebug(message, ...optional);
 }
 
-(<any>global).taskApi = {};
-const taskApi: TaskApi = (<any>global).taskApi;
-taskApi.registerTask = registerTask;
-taskApi.log = logger;
+(<any>global).mm = {};
+const mm: ExtensionApi = (<any>global).mm;
+mm.registerTask = registerTask;
+mm.log = logger;

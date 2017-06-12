@@ -7,6 +7,6 @@ dist/**/*.d.ts
 .npmignore
 out
 *.log
-task-api
+extension-api
 test_data
 *.sh

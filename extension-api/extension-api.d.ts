@@ -1,3 +1,4 @@
+
 interface TaskConfig {
     name: string;
     args: string[];
@@ -12,8 +13,8 @@ interface Logger {
     debug(message: string, ...optional: any[]): void;
 }
 
-interface TaskApi {
+interface ExtensionApi {
     registerTask(taskConfig: TaskConfig, callback: TaskCallback);
     log: Logger;
 }
-declare const taskApi: TaskApi;
+declare const mm: ExtensionApi;
