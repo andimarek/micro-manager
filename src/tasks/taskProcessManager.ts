@@ -6,12 +6,14 @@ import { tmpdir } from 'os';
 import { IMessagePassingProtocol, Protocol } from "../ipc/ipc";
 import { createProxyProtocol } from "../ipc/ipcRemoteCom";
 import { ThreadService } from "../ipc/abstractThreadService";
-import { MainThreadTasksShape, TaskDescription, MainContext, TaskHostContext } from "./taskProtocol";
+import { MainThreadTasksShape, TaskDescription, MainContext, TaskHostContext, TaskThreadTasksShape } from "./taskProtocol";
 import { createMainContextProxyIdentifier } from "../ipc/threadService";
 import { log } from '../log';
+import { Command, CommandResult, addCommand } from "../inputreader";
 
 
 export let threadService: ThreadService;
+let taskHostThreads: TaskThreadTasksShape;
 
 function generateRandomPipeName(): string {
   const randomSuffix = generateUuid();
@@ -39,6 +41,15 @@ class MainThreadTasks implements MainThreadTasksShape {
 
   $registerTask(taskDesc: TaskDescription): void {
     log('registering new task: ', taskDesc);
+    const commandArgs = taskDesc.args.map(name => ({ name }));
+    const command: Command = {
+      name: taskDesc.name,
+      arguments: commandArgs,
+      execute(args: string[]): Promise<CommandResult> {
+        return taskHostThreads.$executeTask(taskDesc.name, args).then(() => ({ success: true }));
+      }
+    };
+    addCommand(command);
   }
 }
 
@@ -68,6 +79,7 @@ export function startTaskProcess(): Promise<any> {
             const remoteCom = createProxyProtocol(protocol);
             threadService = new ThreadService(remoteCom, true);
             threadService.set(MainContext.MainThreadTasks, new MainThreadTasks());
+            taskHostThreads = threadService.get(TaskHostContext.TaskThreadTasks);
             log('task host loaded');
             resolve();
           }
@@ -80,7 +92,6 @@ export function startTaskProcess(): Promise<any> {
 
 export function loadTaskFile(path: string): Promise<any> {
   log.debug('loading tasks project from ', path);
-  const taskHostThreads = threadService.get(TaskHostContext.TaskThreadTasks);
   taskHostThreads.$loadTaskFile(path);
   return Promise.resolve();
 }

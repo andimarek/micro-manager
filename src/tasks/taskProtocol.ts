@@ -1,4 +1,4 @@
-import {createMainContextProxyIdentifier, createTaskHostContextProxyIdentifier} from '../ipc/threadService'
+import { createMainContextProxyIdentifier, createTaskHostContextProxyIdentifier } from '../ipc/threadService'
 
 export interface TaskDescription {
   name: string;
@@ -11,6 +11,7 @@ export abstract class MainThreadTasksShape {
 
 export abstract class TaskThreadTasksShape {
   $loadTaskFile(path: string): void { throw new Error('not implemented'); }
+  $executeTask(name: string, args: any[]): Promise<any> { throw new Error('not implemented'); }
 }
 
 export const MainContext = {

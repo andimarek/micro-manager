@@ -1,6 +1,6 @@
 {
   "name": "micro-manager-task-api",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "task-api for micro-manager",
   "types": "task-api.d.ts",
   "scripts": {

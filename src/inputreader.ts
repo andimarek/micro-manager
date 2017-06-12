@@ -128,6 +128,10 @@ export function setCommands(_commands: Command[]) {
   commands = _commands;
 }
 
+export function addCommand(command:Command) {
+  commands.push(command);
+}
+
 function getCommand(name: string): Command | undefined {
   return find(commands, (command) => command.name === name);
 }
