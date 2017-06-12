@@ -37,7 +37,18 @@ function tryListenOnPipe(): Promise<[Server, string]> {
   });
 }
 
+const logPrefix = "[ExtHost] ";
 class MainThreadTasks implements MainThreadTasksShape {
+
+  $log(message: any, ...optional: any[]): void {
+    log(logPrefix + message, ...optional);
+  }
+  $logError(message: any, ...optional: any[]): void {
+    log.error(logPrefix + message, ...optional);
+  }
+  $logDebug(message: any, ...optional: any[]): void {
+    log.debug(logPrefix + message, ...optional);
+  }
 
   $registerTask(taskDesc: TaskDescription): void {
     log('registering new task: ', taskDesc);

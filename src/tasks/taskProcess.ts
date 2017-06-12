@@ -4,7 +4,6 @@ import { parse } from '../ipc/marshalling';
 import { createProxyProtocol } from '../ipc/ipcRemoteCom';
 import { ThreadService } from "../ipc/abstractThreadService";
 import { MainContext, TaskThreadTasksShape, TaskHostContext, MainThreadTasksShape } from "./taskProtocol";
-import { log } from '../log';
 // recursive imports ... not cool
 import { executeTask } from './task-api-impl';
 
@@ -14,24 +13,23 @@ const nodeRequire = (path: string): void => {
 	try {
 		eval(`require('${path}');`);
 	} catch (e) {
-		log('exception ', e);
+		console.error('exception ', e);
 	}
 };
 
-// const path = process.argv[2];
 const socketName = process.argv[2];
 
-// console.log('starting task process with socket', process.argv[2]);
+// log('starting extension host process with socket');
 
 class TaskHostTasks implements TaskThreadTasksShape {
 
 	$executeTask(name: string, args: any[]): Promise<any> {
-		console.log('executing task ', name);
+		// log.debug('executing task ', name);
 		return executeTask(name, args);
 	}
 
 	$loadTaskFile(path: string): void {
-		console.log('loading dynamically task file from ', path);
+		// log.debug('loading dynamically task file from ', path);
 		nodeRequire(path);
 	}
 

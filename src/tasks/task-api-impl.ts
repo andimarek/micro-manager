@@ -15,6 +15,19 @@ function registerTask(taskConfig: TaskConfig, callback: TaskCallback) {
   mainThreadTasks.$registerTask(taskConfig);
 }
 
+const logger: Logger = <any>((message: string, ...optional: any[]): void => {
+  mainThreadTasks.$log(message, ...optional);
+});
+
+logger.error = (message: string, ...optional: any[]): void => {
+  mainThreadTasks.$logError(message, ...optional);
+};
+
+logger.debug = (message: string, ...optional: any[]): void => {
+  mainThreadTasks.$logDebug(message, ...optional);
+}
+
 (<any>global).taskApi = {};
 const taskApi: TaskApi = (<any>global).taskApi;
 taskApi.registerTask = registerTask;
+taskApi.log = logger;
