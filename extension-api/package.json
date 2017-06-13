@@ -10,12 +10,15 @@
     "type": "git",
     "url": "git+https://github.com/andimarek/micro-manager.git"
   },
-  "author": "",
   "license": "MIT",
+  "author": {
+    "name": "Andreas Marek",
+    "email": "andimarek@fastmail.fm",
+    "url": "andimarek.com"
+  },
   "bugs": {
     "url": "https://github.com/andimarek/micro-manager/issues"
   },
   "homepage": "https://github.com/andimarek/micro-manager#readme",
-  "dependencies": {
-  }
+  "dependencies": {}
 }
