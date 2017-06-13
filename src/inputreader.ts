@@ -98,6 +98,7 @@ const historyFile = `${MicroManagerBaseDir}/history.json`;
 
 let commands: Command[];
 let history: { name: string, args: string[] }[];
+let curHistoryIndex = -1;
 
 const line = new Line();
 
@@ -224,12 +225,26 @@ function lineProcessor(chunk: string): Promise<boolean> {
     return Promise.resolve(true);
   } else if (encodeURI(chunk) === ARROW_UP_ENCODED) {
     if (history.length > 0) {
-      const historyEntry = history[history.length - 1];
+      curHistoryIndex = curHistoryIndex >= 0 ? curHistoryIndex - 1 : history.length - 1;
+      if (curHistoryIndex === -1) {
+        curHistoryIndex = history.length - 1;
+      }
+      const historyEntry = history[curHistoryIndex];
       const newLine = historyEntry.name + ' ' + historyEntry.args.join(' ');
       line.replaceCurrenteLine(newLine);
     }
     return Promise.resolve(true);
   } else if (encodeURI(chunk) === ARROW_DOWN_ENCODED) {
+    if (history.length > 0) {
+      curHistoryIndex = curHistoryIndex >= 0 ? curHistoryIndex + 1 : 0;
+      if (curHistoryIndex === history.length) {
+        curHistoryIndex = 0;
+      }
+      log.debug('history index: ', curHistoryIndex);
+      const historyEntry = history[curHistoryIndex];
+      const newLine = historyEntry.name + ' ' + historyEntry.args.join(' ');
+      line.replaceCurrenteLine(newLine);
+    }
     return Promise.resolve(true);
   } if (chunk === CTRL_C) {
     stop({ exitCode: 0, silent: false });
@@ -238,7 +253,6 @@ function lineProcessor(chunk: string): Promise<boolean> {
     line.write(chunk);
     return Promise.resolve(true);
   }
-  // console.log('1:', encodeURI(chunk));
 }
 
 export function start(commandToExecute?: string): Promise<any> {
