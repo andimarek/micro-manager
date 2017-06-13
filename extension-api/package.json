@@ -20,5 +20,7 @@
     "url": "https://github.com/andimarek/micro-manager/issues"
   },
   "homepage": "https://github.com/andimarek/micro-manager#readme",
-  "dependencies": {}
+  "dependencies": {
+    "typescript": "^2.3.4"
+  }
 }

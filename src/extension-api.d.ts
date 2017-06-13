@@ -14,7 +14,7 @@ interface Logger {
 }
 
 interface ExtensionApi {
-    registerTask(taskConfig: TaskConfig, callback: TaskCallback);
+    registerTask(taskConfig: TaskConfig, callback: TaskCallback): Promise<void>;
     log: Logger;
 }
 declare const mm: ExtensionApi;

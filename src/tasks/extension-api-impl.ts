@@ -9,10 +9,11 @@ export function executeTask(name: string, args: string[]): Promise<any> {
   return callback(args);
 }
 
-function registerTask(taskConfig: TaskConfig, callback: TaskCallback) {
+function registerTask(taskConfig: TaskConfig, callback: TaskCallback): Promise<void> {
   registeredTasks[taskConfig.name] = taskConfig;
   callbacks[taskConfig.name] = callback;
   mainThreadTasks.$registerTask(taskConfig);
+  return Promise.resolve();
 }
 
 const logger: Logger = <any>((message: string, ...optional: any[]): void => {

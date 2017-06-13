@@ -5,7 +5,7 @@ import { createProxyProtocol } from '../ipc/ipcRemoteCom';
 import { ThreadService } from "../ipc/abstractThreadService";
 import { MainContext, TaskThreadTasksShape, TaskHostContext, MainThreadTasksShape } from "./taskProtocol";
 // recursive imports ... not cool
-import { executeTask } from './task-api-impl';
+import { executeTask } from './extension-api-impl';
 
 export let mainThreadTasks: MainThreadTasksShape;
 
