@@ -97,7 +97,7 @@ const historyFile = `${MicroManagerBaseDir}/history.json`;
 
 
 let commands: Command[];
-let history: string[];
+let history: { name: string, args: string[] }[];
 
 const line = new Line();
 
@@ -128,7 +128,7 @@ export function setCommands(_commands: Command[]) {
   commands = _commands;
 }
 
-export function addCommand(command:Command) {
+export function addCommand(command: Command) {
   commands.push(command);
 }
 
@@ -170,13 +170,13 @@ function executeCommand(command: Command, args: string[]): Promise<boolean> {
 function handleLine(line: string): Promise<boolean> {
   const parts = line.split(" ");
   if (parts[0] === 'help') {
-    history.push('help');
+    history.push({ name: 'help', args: [] });
     printHelp();
     return Promise.resolve(true);
   }
   const command = getCommand(parts[0]);
   if (command) {
-    history.push(command.name);
+    history.push({ name: command.name, args: parts.slice(1) });
     return executeCommand(command, parts.slice(1));
   } else {
     log(`🤷  unknown command ${parts[0]} ... use 'help' to get the available commands`);
@@ -224,7 +224,9 @@ function lineProcessor(chunk: string): Promise<boolean> {
     return Promise.resolve(true);
   } else if (encodeURI(chunk) === ARROW_UP_ENCODED) {
     if (history.length > 0) {
-      line.replaceCurrenteLine(history[history.length - 1]);
+      const historyEntry = history[history.length - 1];
+      const newLine = historyEntry.name + ' ' + historyEntry.args.join(' ');
+      line.replaceCurrenteLine(newLine);
     }
     return Promise.resolve(true);
   } else if (encodeURI(chunk) === ARROW_DOWN_ENCODED) {
