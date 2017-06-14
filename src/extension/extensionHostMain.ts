@@ -19,8 +19,6 @@ const nodeRequire = (path: string): void => {
 
 const socketName = process.argv[2];
 
-// log('starting extension host process with socket');
-
 class TaskHostTasks implements TaskThreadTasksShape {
 
 	$executeTask(name: string, args: any[]): Promise<any> {

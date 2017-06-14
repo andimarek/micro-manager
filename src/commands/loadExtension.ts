@@ -7,7 +7,7 @@ import { loadExtensionFile } from '../extension/extensionHostManager';
 
 
 const command: Command = {
-  name: 'load-tasks',
+  name: 'load-extension',
   arguments: [
     { name: 'path' }
   ],
