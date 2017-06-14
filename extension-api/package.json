@@ -1,6 +1,6 @@
 {
   "name": "micro-manager-extension-api",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "extension-api for micro-manager",
   "types": "extension-api.d.ts",
   "scripts": {
