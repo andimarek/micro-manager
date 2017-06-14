@@ -16,7 +16,7 @@ function registerTask(taskConfig: TaskConfig, callback: TaskCallback): Promise<v
   return Promise.resolve();
 }
 
-function getRepoForProject(projectName: string): Repository | undefined {
+function getRepoForProject(projectName: string): Promise<Repository | undefined> {
   return mainThreadTasks.$getRepoForProject(projectName);
 }
 

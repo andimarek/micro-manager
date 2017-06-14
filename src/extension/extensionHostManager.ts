@@ -10,7 +10,7 @@ import { MainThreadTasksShape, TaskDescription, MainContext, TaskHostContext, Ta
 import { createMainContextProxyIdentifier } from "../ipc/threadService";
 import { log } from '../log';
 import { Command, CommandResult, addCommand } from "../inputreader";
-import { getRepositoryByProjectName } from '../domain';
+import {getRepositoryByProjectName} from '../domain';
 
 
 export let threadService: ThreadService;
@@ -41,8 +41,8 @@ function tryListenOnPipe(): Promise<[Server, string]> {
 const logPrefix = "[ExtHost] ";
 class MainThreadTasks implements MainThreadTasksShape {
 
-  $getRepoForProject(projectName: string): Repository | undefined {
-    return getRepositoryByProjectName(projectName);
+  $getRepoForProject(projectName: string): Promise<Repository | undefined> {
+    return Promise.resolve(getRepositoryByProjectName(projectName));
   }
 
   $log(message: any, ...optional: any[]): void {
@@ -70,7 +70,7 @@ class MainThreadTasks implements MainThreadTasksShape {
 }
 
 export function startExtHostProcess(): Promise<any> {
-  const modulePath = './dist/extensionHost';
+  const modulePath = './dist/taskProcess';
   return tryListenOnPipe().then(([server, hook]) => {
     const childProcess = fork(modulePath, [hook]);
 

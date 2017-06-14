@@ -20,7 +20,7 @@ interface Repository {
 
 interface ExtensionApi {
     registerTask(taskConfig: TaskConfig, callback: TaskCallback): Promise<void>;
-    getRepoForProject(projectName: string): Repository | undefined;
+    getRepoForProject(projectName: string): Promise<Repository | undefined>;
     log: Logger;
 }
 declare const mm: ExtensionApi;
