@@ -3,7 +3,7 @@ import { pull } from '../data-exchange';
 import { getConfig, Config } from '../domain';
 import { find } from 'lodash';
 import { log } from '../log';
-import { loadTaskFile } from '../tasks/taskProcessManager';
+import { loadExtensionFile } from '../extension/extensionHostManager';
 
 
 const command: Command = {
@@ -18,7 +18,7 @@ const command: Command = {
 
 function execute(args: string[]): Promise<CommandResult> {
   const path = args[0];
-  loadTaskFile(path);
+  loadExtensionFile(path);
   return Promise.resolve({success: true});
 }
 

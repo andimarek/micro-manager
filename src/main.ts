@@ -12,8 +12,8 @@ import data from './commands/data';
 import exit from './commands/exit';
 import analyzeDeps from './commands/analyzeDeps';
 import remoteCommands from './commands/remote';
-import loadTasks from './commands/loadTasks';
-import { startTaskProcess } from './tasks/taskProcessManager';
+import loadExtension from './commands/loadExtension';
+import { startExtHostProcess } from './extension/extensionHostManager';
 
 
 process.on('uncaughtException', (exception) => {
@@ -41,12 +41,12 @@ const commands: Command[] = [
   data,
   exit,
   analyzeDeps,
-  loadTasks,
+  loadExtension,
   ...remoteCommands
 ];
 setCommands(commands);
 
 initDomain()
   // .then(openServer)
-  .then(() => startTaskProcess())
+  .then(() => startExtHostProcess())
   .then(() => startReadingInput(program.execute))

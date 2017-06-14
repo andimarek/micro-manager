@@ -6,10 +6,11 @@ import { tmpdir } from 'os';
 import { IMessagePassingProtocol, Protocol } from "../ipc/ipc";
 import { createProxyProtocol } from "../ipc/ipcRemoteCom";
 import { ThreadService } from "../ipc/abstractThreadService";
-import { MainThreadTasksShape, TaskDescription, MainContext, TaskHostContext, TaskThreadTasksShape } from "./taskProtocol";
+import { MainThreadTasksShape, TaskDescription, MainContext, TaskHostContext, TaskThreadTasksShape } from "./extensionHostProtocol";
 import { createMainContextProxyIdentifier } from "../ipc/threadService";
 import { log } from '../log';
 import { Command, CommandResult, addCommand } from "../inputreader";
+import { getRepositoryByProjectName } from '../domain';
 
 
 export let threadService: ThreadService;
@@ -40,6 +41,10 @@ function tryListenOnPipe(): Promise<[Server, string]> {
 const logPrefix = "[ExtHost] ";
 class MainThreadTasks implements MainThreadTasksShape {
 
+  $getRepoForProject(projectName: string): Repository | undefined {
+    return getRepositoryByProjectName(projectName);
+  }
+
   $log(message: any, ...optional: any[]): void {
     log(logPrefix + message, ...optional);
   }
@@ -64,8 +69,8 @@ class MainThreadTasks implements MainThreadTasksShape {
   }
 }
 
-export function startTaskProcess(): Promise<any> {
-  const modulePath = './dist/taskProcess';
+export function startExtHostProcess(): Promise<any> {
+  const modulePath = './dist/extensionHost';
   return tryListenOnPipe().then(([server, hook]) => {
     const childProcess = fork(modulePath, [hook]);
 
@@ -101,7 +106,7 @@ export function startTaskProcess(): Promise<any> {
   });
 }
 
-export function loadTaskFile(path: string): Promise<any> {
+export function loadExtensionFile(path: string): Promise<any> {
   log.debug('loading tasks project from ', path);
   taskHostThreads.$loadTaskFile(path);
   return Promise.resolve();

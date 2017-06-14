@@ -38,10 +38,6 @@ export interface Product {
   projects: Project[];
 }
 
-export interface Task {
-
-}
-
 export interface Config {
   rootPath?: string;
   remotes: RemoteManager[];
@@ -220,6 +216,15 @@ export function getRepos(): Repository[] {
 
 export function getRepositoryById(id: string): Repository | undefined {
   return find(data.repos, (repo) => repo.id === id);
+}
+
+export function getRepositoryByProjectName(projectName: string): Repository | undefined {
+  const project = find(data.projects, (project) => project.id === projectName);
+  if(!project) {
+    return undefined;
+  }
+  const repo = getRepositoryById(project.repositoryId);
+  return repo;
 }
 
 export function getRepositoryByIdSafe(id: string): Repository {

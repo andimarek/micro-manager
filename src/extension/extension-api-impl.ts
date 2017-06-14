@@ -1,4 +1,4 @@
-import { mainThreadTasks } from './taskProcess';
+import { mainThreadTasks } from './extensionHostMain';
 
 
 const registeredTasks: { [name: string]: TaskConfig } = {};
@@ -14,6 +14,10 @@ function registerTask(taskConfig: TaskConfig, callback: TaskCallback): Promise<v
   callbacks[taskConfig.name] = callback;
   mainThreadTasks.$registerTask(taskConfig);
   return Promise.resolve();
+}
+
+function getRepoForProject(projectName: string): Repository | undefined {
+  return mainThreadTasks.$getRepoForProject(projectName);
 }
 
 const logger: Logger = <any>((message: string, ...optional: any[]): void => {

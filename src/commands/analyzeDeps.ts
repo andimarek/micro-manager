@@ -2,7 +2,7 @@ import { Repository, Config, getRepos, getConfig } from '../domain';
 import { spawn } from 'child_process';
 import { noop } from 'lodash';
 import { gitClone } from '../git';
-import { checkForDifferentVersions } from '../tasks/analyzeDependencies'
+import { checkForDifferentVersions } from '../extension/analyzeDependencies';
 
 import { Command, CommandResult } from '../inputreader';
 

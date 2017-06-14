@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { Project, Repository } from '../src/domain';
-import { createInfoMessage, getRuntimeDependencies, ProjectAndDependencies, checkVersion } from '../src/tasks/analyzeDependencies';
+import { createInfoMessage, getRuntimeDependencies, ProjectAndDependencies, checkVersion } from '../src/extension/analyzeDependencies';
 import { Configuration, Artifact } from '../src/gradle';
 
 const repo: Repository = {

@@ -3,7 +3,7 @@ import { IMessagePassingProtocol, Protocol } from '../ipc/ipc';
 import { parse } from '../ipc/marshalling';
 import { createProxyProtocol } from '../ipc/ipcRemoteCom';
 import { ThreadService } from "../ipc/abstractThreadService";
-import { MainContext, TaskThreadTasksShape, TaskHostContext, MainThreadTasksShape } from "./taskProtocol";
+import { MainContext, TaskThreadTasksShape, TaskHostContext, MainThreadTasksShape } from "./extensionHostProtocol";
 // recursive imports ... not cool
 import { executeTask } from './extension-api-impl';
 

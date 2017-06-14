@@ -13,8 +13,14 @@ interface Logger {
     debug(message: string, ...optional: any[]): void;
 }
 
+interface Repository {
+    type: string;
+    url: string;
+}
+
 interface ExtensionApi {
     registerTask(taskConfig: TaskConfig, callback: TaskCallback): Promise<void>;
+    getRepoForProject(projectName: string): Repository | undefined;
     log: Logger;
 }
 declare const mm: ExtensionApi;

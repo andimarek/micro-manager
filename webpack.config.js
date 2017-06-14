@@ -5,7 +5,7 @@ module.exports = {
   target: 'node',
   entry: {
     mm:'./src/main',
-    taskProcess: './src/tasks/taskProcess'
+    extensionHost: './src/extension/extensionHostMain'
   },
   output: {
     filename: '[name].js',

@@ -7,6 +7,7 @@ export interface TaskDescription {
 
 export abstract class MainThreadTasksShape {
   $registerTask(taskDesc: TaskDescription): void { throw new Error('not implemented'); }
+  $getRepoForProject(projectName: string): Repository | undefined {throw new Error('not implemented') };
   $log(message:string, ...optional: any[]): void { throw new Error('not implemented'); }
   $logError(message:string, ...optional: any[]): void { throw new Error('not implemented'); };
   $logDebug(message:string, ...optional: any[]): void { throw new Error('not implemented'); };
