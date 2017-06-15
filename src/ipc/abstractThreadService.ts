@@ -51,7 +51,6 @@ export abstract class AbstractThreadService implements IManyHandler {
 
 	private createMethodProxy(id: string, methodName: string): (...myArgs: any[]) => Promise<any> {
 		return (...myArgs: any[]) => {
-			console.log('calling remote for ', methodName);
 			return this._callOnRemote(id, methodName, myArgs);
 		};
 	}

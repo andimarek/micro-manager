@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { ensureDirExists, readFile, writeFile, sleep } from './util';
 import { assertDefined, assertTrue } from './assert';
 import { ensureGitRepo, ensureFileIsCommited } from './git';
-import {MicroManagerBaseDir} from './constants';
+import { MicroManagerBaseDir } from './constants';
 
 export interface Repository {
   id: string;
@@ -74,8 +74,8 @@ export function getDataDir() {
   return dataDir;
 }
 
-export async function refreshData(){
-  data = <Data> await readFile(dataFileFullPath, { repos: [], projects: [] } as Data);
+export async function refreshData() {
+  data = <Data>await readFile(dataFileFullPath, { repos: [], projects: [] } as Data);
   log.debug('refreshed data:', data);
 }
 
@@ -130,7 +130,7 @@ function validProjectTypes() {
     if (complexType.name !== PROJECT_TYPE_GRADLE) {
       return true;
     }
-    if(isUndefined(complexType['gradlew-path'])) {
+    if (isUndefined(complexType['gradlew-path'])) {
       return true;
     }
   });
@@ -219,8 +219,8 @@ export function getRepositoryById(id: string): Repository | undefined {
 }
 
 export function getRepositoryByProjectName(projectName: string): Repository | undefined {
-  const project = find(data.projects, (project) => project.id === projectName);
-  if(!project) {
+  const project = find(data.projects, (project) => project.name === projectName);
+  if (!project) {
     return undefined;
   }
   const repo = getRepositoryById(project.repositoryId);
