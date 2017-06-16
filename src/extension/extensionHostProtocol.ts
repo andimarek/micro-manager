@@ -14,7 +14,7 @@ export abstract class MainThreadTasksShape {
 }
 
 export abstract class TaskThreadTasksShape {
-  $loadTaskFile(path: string): void { throw new Error('not implemented'); }
+  $loadTaskFile(path: string): Promise<void> { throw new Error('not implemented'); }
   $executeTask(name: string, args: any[]): Promise<any> { throw new Error('not implemented'); }
 }
 

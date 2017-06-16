@@ -14,6 +14,7 @@ const nodeRequire = (path: string): void => {
 		eval(`require('${path}');`);
 	} catch (e) {
 		console.error('exception ', e);
+		throw e;
 	}
 };
 
@@ -26,11 +27,16 @@ class TaskHostTasks implements TaskThreadTasksShape {
 		return executeTask(name, args);
 	}
 
-	$loadTaskFile(path: string): void {
-		// log.debug('loading dynamically task file from ', path);
-		nodeRequire(path);
+	$loadTaskFile(path: string): Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+			try {
+				nodeRequire(path);
+				resolve();
+			} catch (e) {
+				reject(e);
+			}
+		});
 	}
-
 }
 
 
