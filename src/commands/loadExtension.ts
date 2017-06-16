@@ -18,8 +18,13 @@ const command: Command = {
 
 function execute(args: string[]): Promise<CommandResult> {
   const path = args[0];
-  loadExtensionFile(path);
-  return Promise.resolve({success: true});
+  return loadExtensionFile(path)
+    .then(() => {
+      return { success: true };
+    })
+    .catch((error) => {
+      return { success: false, output: error }
+    });
 }
 
 export default command;

@@ -40,6 +40,7 @@
     "@types/lodash": "^4.14.62",
     "@types/mocha": "^2.2.41",
     "@types/node": "^7.0.12",
+    "@types/request": "^0.0.43",
     "@types/string": "^0.0.28",
     "@types/tmp": "^0.0.32",
     "@types/winston": "^2.3.1",
@@ -53,11 +54,11 @@
     "lodash": "^4.17.4",
     "mocha": "^3.3.0",
     "ramda": "^0.23.0",
+    "request": "^2.81.0",
     "tmp": "^0.0.31",
     "typescript": "^2.3.4",
     "webpack": "^2.3.3",
     "winston": "^2.3.1",
     "xml2js": "^0.4.17"
-  },
-  "dependencies": {}
+  }
 }

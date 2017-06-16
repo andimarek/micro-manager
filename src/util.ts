@@ -1,4 +1,4 @@
-import { dirSync } from 'tmp';
+import { dirSync, fileSync } from 'tmp';
 import { exec, execFile, execSync } from 'child_process';
 import * as fs from 'fs';
 import { assertTrue } from './assert';
@@ -43,6 +43,9 @@ export function newTmpDir(): string {
   return dirSync().name;
 }
 
+export function newTmpFile(): string {
+  return fileSync().name;
+}
 export function addToArray<T>(collection: { [key: string]: T[] }, key: string, value: T): void {
   if (collection[key]) {
     collection[key].push(value);

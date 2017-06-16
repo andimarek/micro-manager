@@ -11,6 +11,9 @@ import { createMainContextProxyIdentifier } from "../ipc/threadService";
 import { log } from '../log';
 import { Command, CommandResult, addCommand } from "../inputreader";
 import { getRepositoryByProjectName } from '../domain';
+import { newTmpFile } from "../util";
+import { get } from 'request';
+import { createWriteStream } from 'fs'
 
 
 export let threadService: ThreadService;
@@ -109,7 +112,20 @@ export function startExtHostProcess(): Promise<any> {
 }
 
 export function loadExtensionFile(path: string): Promise<any> {
-  log.debug('loading tasks project from ', path);
-  taskHostThreads.$loadTaskFile(path);
-  return Promise.resolve();
+  log('loading extension from ', path);
+  if (path.startsWith('http')) {
+    const tmpFile = newTmpFile();
+    return new Promise<void>((resolve, reject) => {
+      get(path, function (error, response, body) {
+        if (error) {
+          reject(error);
+        }
+        taskHostThreads.$loadTaskFile(tmpFile);
+        resolve();
+      }).pipe(createWriteStream(tmpFile));
+    });
+  } else {
+    taskHostThreads.$loadTaskFile(path);
+    return Promise.resolve();
+  }
 }
