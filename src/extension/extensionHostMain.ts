@@ -9,9 +9,9 @@ import { executeTask } from './extension-api-impl';
 
 export let mainThreadTasks: MainThreadTasksShape;
 
-const nodeRequire = (path: string): void => {
+const nodeRequire = (path: string): any => {
 	try {
-		eval(`require('${path}');`);
+		return eval(`require('${path}');`);
 	} catch (e) {
 		console.error('exception ', e);
 		throw e;
@@ -28,10 +28,12 @@ class TaskHostTasks implements TaskThreadTasksShape {
 	}
 
 	$loadTaskFile(path: string): Promise<void> {
+		mm.log.debug('loading file: ', path);
 		return new Promise<void>((resolve, reject) => {
 			try {
-				nodeRequire(path);
-				resolve();
+				const promise = <Promise<void> | undefined>nodeRequire(path);
+				mm.log.debug('returned value from require: ', promise);
+				resolve(promise);
 			} catch (e) {
 				reject(e);
 			}

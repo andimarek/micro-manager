@@ -101,7 +101,7 @@ export function startExtHostProcess(): Promise<any> {
             threadService = new ThreadService(remoteCom, true);
             threadService.set(MainContext.MainThreadTasks, new MainThreadTasks());
             taskHostThreads = threadService.get(TaskHostContext.TaskThreadTasks);
-            log('task host loaded');
+            log('extension host process started');
             resolve();
           }
           return undefined;
@@ -120,8 +120,7 @@ export function loadExtensionFile(path: string): Promise<any> {
         if (error) {
           reject(error);
         }
-        taskHostThreads.$loadTaskFile(tmpFile);
-        resolve();
+        return taskHostThreads.$loadTaskFile(tmpFile);
       }).pipe(createWriteStream(tmpFile));
     });
   } else {
