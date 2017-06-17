@@ -1,5 +1,6 @@
 webpack.config.js
 tsconfig.json
+tsconfig.test.json
 .vscode
 test
 dist/**/*.d.ts
