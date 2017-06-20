@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import { assertTrue } from './assert';
 import { log } from './log';
 import { mapLimit as asyncMapLimit } from 'async';
-import {inspect as nodeInspect} from 'util';
+import { inspect as nodeInspect } from 'util';
 
 
 export function inspect(toPrint: any): string {
@@ -52,6 +52,12 @@ export function addToArray<T>(collection: { [key: string]: T[] }, key: string, v
   } else {
     collection[key] = [value];
   }
+}
+
+export function removeLastPathSegment(path: string): string {
+  const ix = path.lastIndexOf('/');
+  if (ix === -1) return path;
+  return path.substring(0, ix);
 }
 
 export function makePath(part1: string, part2: string): string;

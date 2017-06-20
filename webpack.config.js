@@ -4,7 +4,7 @@ var webpack = require('webpack');
 module.exports = {
   target: 'node',
   entry: {
-    mm:'./src/main',
+    mm: './src/main',
     extensionHost: './src/extension/extensionHostMain'
   },
   output: {
@@ -24,7 +24,6 @@ module.exports = {
   externals: {
   },
   plugins: [
-    // new webpack.IgnorePlugin(/data.json/),
-    new webpack.BannerPlugin({banner: '#!/usr/bin/env node', raw: true })
+    new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true })
   ],
 };

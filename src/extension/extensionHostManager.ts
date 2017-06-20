@@ -11,7 +11,7 @@ import { createMainContextProxyIdentifier } from "../ipc/threadService";
 import { log } from '../log';
 import { Command, CommandResult, addCommand } from "../inputreader";
 import { getRepositoryByProjectName } from '../domain';
-import { newTmpFile } from "../util";
+import { newTmpFile, makePath, removeLastPathSegment } from "../util";
 import { get } from 'request';
 import { createWriteStream } from 'fs'
 
@@ -75,9 +75,9 @@ class MainThreadTasks implements MainThreadTasksShape {
 }
 
 export function startExtHostProcess(): Promise<any> {
-  const modulePath = './dist/extensionHost';
+  const extensionHostFile = makePath(removeLastPathSegment(eval('__filename')), 'extensionHost');  
   return tryListenOnPipe().then(([server, hook]) => {
-    const childProcess = fork(modulePath, [hook]);
+    const childProcess = fork(extensionHostFile, [hook]);
 
     return new Promise<IMessagePassingProtocol>((resolve, reject) => {
       let handle = setTimeout(() => reject('timeout'), 60 * 1000);
