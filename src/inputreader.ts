@@ -274,6 +274,7 @@ export function start(commandToExecute?: string): Promise<any> {
             if (success) {
               return Promise.resolve(true);
             } else {
+              log('stoping because command failed');
               return stop({ exitCode: 1, silent: true }).then(() => false);
             }
           });
