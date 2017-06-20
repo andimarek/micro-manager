@@ -24,11 +24,11 @@ export interface Project {
 }
 
 export const PROJECT_TYPE_GRADLE = 'gradle';
-// export const PROJECT_TYPE_MAVEN = 'maven';
-const PROJECT_TYPES = [PROJECT_TYPE_GRADLE];
+export const PROJECT_TYPE_MAVEN = 'maven';
+const PROJECT_TYPES = [PROJECT_TYPE_GRADLE, PROJECT_TYPE_MAVEN];
 
 export interface GradleComplexType {
-  name: 'gradle';
+  name: 'gradle' | 'maven';
   'gradlew-path': string
 };
 export type ProjectType = string | GradleComplexType;
