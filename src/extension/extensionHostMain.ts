@@ -18,6 +18,14 @@ const nodeRequire = (path: string): any => {
 	}
 };
 
+// setInterval(function () {
+// 	try {
+// 		process.kill(initData.parentPid, 0); // throws an exception if the main process doesn't exist anymore.
+// 	} catch (e) {
+// 		onTerminate();
+// 	}
+// }, 5000);
+
 const socketName = process.argv[2];
 
 class TaskHostTasks implements TaskThreadTasksShape {
@@ -52,7 +60,6 @@ const p = new Promise<IMessagePassingProtocol>((resolve, reject) => {
 
 }).then(protocol => {
 	const first = protocol.onMessage(raw => {
-		// console.log('received message', raw);
 		first.dispose();
 
 		// const initData = parse(raw);

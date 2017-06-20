@@ -267,6 +267,7 @@ export function start(commandToExecute?: string): Promise<any> {
       });
       if (commandToExecute) {
         const commands = commandToExecute.split(';');
+        log('about to execute:', commands);
         mapLimit(commands, 1, (command) => {
           line.write(command);
           return lineProcessor(CR).then((success) => {

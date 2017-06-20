@@ -20,9 +20,11 @@ function execute(args: string[]): Promise<CommandResult> {
   const path = args[0];
   return loadExtensionFile(path)
     .then(() => {
+      log.debug('load extension successful');
       return { success: true };
     })
     .catch((error) => {
+      log.debug('load extension failed', error);
       return { success: false, output: error }
     });
 }

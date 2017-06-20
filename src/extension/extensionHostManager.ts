@@ -75,7 +75,7 @@ class MainThreadTasks implements MainThreadTasksShape {
 }
 
 export function startExtHostProcess(): Promise<any> {
-  const extensionHostFile = makePath(removeLastPathSegment(eval('__filename')), 'extensionHost');  
+  const extensionHostFile = makePath(removeLastPathSegment(eval('__filename')), 'extensionHost');
   return tryListenOnPipe().then(([server, hook]) => {
     const childProcess = fork(extensionHostFile, [hook]);
 
@@ -120,7 +120,7 @@ export function loadExtensionFile(path: string): Promise<any> {
         if (error) {
           reject(error);
         }
-        return taskHostThreads.$loadTaskFile(tmpFile);
+        resolve(taskHostThreads.$loadTaskFile(tmpFile));
       }).pipe(createWriteStream(tmpFile));
     });
   } else {
