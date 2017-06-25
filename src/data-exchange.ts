@@ -24,7 +24,7 @@ export function openServer(): Promise<any> {
         default:
           return Promise.resolve(false);
       }
-    }
+    },
   };
   return serve(DEFAULT_PORT)
     .then((server: Server) => {

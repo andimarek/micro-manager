@@ -38,8 +38,8 @@ logger.debug = (message: string, ...optional: any[]): void => {
 };
 
 const mm: ExtensionApi = {
-  getRepoForProject: getRepoForProject,
-  registerTask: registerTask,
-  log: logger
+  getRepoForProject,
+  registerTask,
+  log: logger,
 };
 (<any>global).mm = mm;

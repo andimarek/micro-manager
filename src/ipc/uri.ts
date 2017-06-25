@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-('use strict');
+/* tslint:disable */
 
 const isWindows = process.platform === 'win32';
 const isMacintosh = process.platform === 'darwin';
@@ -261,7 +261,7 @@ export default class URI {
       authority: URI._empty,
       path: URI._empty,
       query: URI._empty,
-      fragment: URI._empty
+      fragment: URI._empty,
     };
 
     const match = URI._regexp.exec(value);
@@ -397,7 +397,7 @@ export default class URI {
     const res = <UriState>{
       fsPath: this.fsPath,
       external: this.toString(),
-      $mid: 1
+      $mid: 1,
     };
 
     if (this.path) {

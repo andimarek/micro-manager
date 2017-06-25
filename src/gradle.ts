@@ -85,7 +85,7 @@ function parseConfiguration(
   const configuration = {
     name: parts[0],
     desc: parts[1] || '',
-    dependencies: []
+    dependencies: [],
   };
   const parsedLines = parseDependenciesForOneConfiguration(
     lines,
@@ -148,6 +148,6 @@ function parseArtifact(toParse: string): Artifact | null {
   return {
     groupId: parts[0],
     artifactId: parts[1],
-    version: parts[2]
+    version: parts[2],
   };
 }

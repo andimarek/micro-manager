@@ -1,3 +1,4 @@
+/* tslint:disable */
 import { IDisposable } from './lifecycle';
 import CallbackList from './callbackList';
 
@@ -76,7 +77,7 @@ export class Emitter<T> {
                 this._options.onLastListenerRemove(this);
               }
             }
-          }
+          },
         };
         if (Array.isArray(disposables)) {
           disposables.push(result);

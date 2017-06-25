@@ -11,7 +11,7 @@ const command: Command = {
   arguments: [],
   execute(args: string[]) {
     return analyze();
-  }
+  },
 };
 
 export default command;

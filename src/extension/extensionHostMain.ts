@@ -7,7 +7,7 @@ import {
   MainContext,
   TaskThreadTasksShape,
   TaskHostContext,
-  MainThreadTasksShape
+  MainThreadTasksShape,
 } from './extensionHostProtocol';
 // recursive imports ... not cool
 import { executeTask } from './extension-api-impl';
@@ -16,6 +16,7 @@ export let mainThreadTasks: MainThreadTasksShape;
 
 const nodeRequire = (path: string): any => {
   try {
+    // tslint:disable-next-line: no-eval
     return eval(`require('${path}');`);
   } catch (e) {
     console.error('exception ', e);

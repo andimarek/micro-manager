@@ -1,6 +1,6 @@
 import {
   createMainContextProxyIdentifier,
-  createTaskHostContextProxyIdentifier
+  createTaskHostContextProxyIdentifier,
 } from '../ipc/threadService';
 
 export interface TaskDescription {
@@ -39,12 +39,12 @@ export const MainContext = {
   MainThreadTasks: createMainContextProxyIdentifier<MainThreadTasksShape>(
     'MainThreadTasks',
     MainThreadTasksShape
-  )
+  ),
 };
 
 export const TaskHostContext = {
   TaskThreadTasks: createTaskHostContextProxyIdentifier<TaskThreadTasksShape>(
     'TashThreadTasks',
     TaskThreadTasksShape
-  )
+  ),
 };

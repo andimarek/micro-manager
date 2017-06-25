@@ -9,7 +9,7 @@ const command: Command = {
   arguments: [{ name: 'remoteName' }],
   execute(args: string[]) {
     return execute(args);
-  }
+  },
 };
 
 function execute(args: string[]) {

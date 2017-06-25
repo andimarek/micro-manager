@@ -1,3 +1,4 @@
+/* tslint:disable */
 import * as net from 'net';
 import { log } from '../log';
 import { Repository, Data, mergeData, setData, getData } from '../domain';
@@ -8,7 +9,7 @@ import * as R from 'ramda';
 
 enum RequestType {
   Common,
-  Cancel
+  Cancel,
 }
 
 interface IRawRequest {
@@ -30,7 +31,7 @@ enum ResponseType {
   Success,
   Progress,
   Error,
-  ErrorObj
+  ErrorObj,
 }
 
 interface IRawResponse {
@@ -50,7 +51,7 @@ export interface IMessagePassingProtocol {
 
 enum State {
   Uninitialized,
-  Idle
+  Idle,
 }
 
 export interface IChannel {
@@ -119,9 +120,9 @@ export class IPCServer {
               data: {
                 message: data.message,
                 name: data.name,
-                stack: data.stack ? data.stack.split('\n') : void 0
+                stack: data.stack ? data.stack.split('\n') : void 0,
               },
-              type: ResponseType.Error
+              type: ResponseType.Error,
             }
           );
         } else {
@@ -185,8 +186,8 @@ export class IPCClient implements IClient {
         type: RequestType.Common,
         channelName,
         name,
-        arg
-      }
+        arg,
+      },
     };
 
     if (this.state === State.Uninitialized) {
@@ -289,7 +290,7 @@ export class Protocol implements IMessagePassingProtocol {
     const state = {
       readHead: true,
       bodyIsJson: false,
-      bodyLen: -1
+      bodyLen: -1,
     };
 
     _socket.on('data', (data: Buffer) => {

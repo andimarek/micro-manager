@@ -8,7 +8,7 @@ import {
   uniqBy,
   reduce,
   groupBy,
-  filter
+  filter,
 } from 'lodash';
 import { log } from './log';
 import * as fs from 'fs';
@@ -269,7 +269,7 @@ export function mergeData(otherData: Data): Data | null {
   const newProjects = mergeProjects(otherData.projects, data.projects);
   const result: Data = {
     repos: newRepos,
-    projects: newProjects
+    projects: newProjects,
   };
   return result;
 }

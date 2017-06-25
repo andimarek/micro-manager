@@ -10,7 +10,7 @@ const setOriginCommand: Command = {
   arguments: [{ name: 'remote-url' }],
   execute(args: string[]) {
     return setOrigin(getDataDir(), args[0]).then(constant({ success: true }));
-  }
+  },
 };
 
 const pullOriginCommand: Command = {
@@ -21,7 +21,7 @@ const pullOriginCommand: Command = {
       .then(() => checkoutOrigin(getDataDir(), 'masterOrigin'))
       .then(() => refreshData())
       .then(constant({ success: true }));
-  }
+  },
 };
 
 export default [setOriginCommand, pullOriginCommand];

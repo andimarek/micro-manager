@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-('use strict');
+/* tslint:disable */
 
 import * as marshalling from './marshalling';
 import { IMessagePassingProtocol } from './ipc';
@@ -15,7 +15,7 @@ export function transformErrorForSerialization(error: any): any {
       $isError: true,
       name,
       message,
-      stack
+      stack,
     };
   }
   return error;
@@ -277,7 +277,7 @@ export function createProxyProtocol(
     callOnRemote: rpc,
     setManyHandler: (_bigHandler: IManyHandler): void => {
       bigHandler = _bigHandler;
-    }
+    },
   };
 
   function sendAccumulated(): void {

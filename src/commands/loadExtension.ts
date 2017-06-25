@@ -10,7 +10,7 @@ const command: Command = {
   arguments: [{ name: 'path' }],
   execute(args: string[]) {
     return execute(args);
-  }
+  },
 };
 
 function execute(args: string[]): Promise<CommandResult> {

@@ -11,7 +11,7 @@ import {
   TaskDescription,
   MainContext,
   TaskHostContext,
-  TaskThreadTasksShape
+  TaskThreadTasksShape,
 } from './extensionHostProtocol';
 import { createMainContextProxyIdentifier } from '../ipc/threadService';
 import { log } from '../log';
@@ -74,7 +74,7 @@ class MainThreadTasks implements MainThreadTasksShape {
         return taskHostThreads
           .$executeTask(taskDesc.name, args)
           .then(() => ({ success: true }));
-      }
+      },
     };
     addCommand(command);
   }
@@ -82,6 +82,7 @@ class MainThreadTasks implements MainThreadTasksShape {
 
 export function startExtHostProcess(): Promise<any> {
   const extensionHostFile = makePath(
+    // tslint:disable-next-line: no-eval
     removeLastPathSegment(eval('__filename')),
     'extensionHost'
   );
@@ -89,7 +90,7 @@ export function startExtHostProcess(): Promise<any> {
     const childProcess = fork(extensionHostFile, [hook]);
 
     return new Promise<IMessagePassingProtocol>((resolve, reject) => {
-      let handle = setTimeout(() => reject('timeout'), 60 * 1000);
+      const handle = setTimeout(() => reject('timeout'), 60 * 1000);
       server.on('connection', socket => {
         clearTimeout(handle);
         const protocol = new Protocol(socket);
@@ -129,7 +130,7 @@ export function loadExtensionFile(path: string): Promise<any> {
   if (path.startsWith('http')) {
     const tmpFile = newTmpFile();
     return new Promise<void>((resolve, reject) => {
-      get(path, function(error, response, body) {
+      get(path, (error, response, body) => {
         if (error) {
           reject(error);
         }

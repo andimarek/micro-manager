@@ -11,6 +11,6 @@ function parsePomXml(file: string) {
     const json = JSON.stringify(result);
     const dependencies = result.project.dependencies[0].dependency;
 
-    forEach(dependencies, (dep, key) => {});
+    // forEach(dependencies, (dep, key) => {});
   });
 }

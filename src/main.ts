@@ -1,7 +1,7 @@
 import {
   setCommands,
   Command,
-  start as startReadingInput
+  start as startReadingInput,
 } from './inputreader';
 import { init as initDomain, getRepos, Repository, getConfig } from './domain';
 import { openServer } from './data-exchange';
@@ -45,7 +45,7 @@ const commands: Command[] = [
   exit,
   analyzeDeps,
   loadExtension,
-  ...remoteCommands
+  ...remoteCommands,
 ];
 setCommands(commands);
 

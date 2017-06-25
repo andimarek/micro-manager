@@ -3,7 +3,7 @@ import {
   Repository,
   Config,
   Project,
-  getRepositoryByIdSafe
+  getRepositoryByIdSafe,
 } from './domain';
 import { exec, execFile } from 'child_process';
 import { log } from './log';
@@ -17,7 +17,7 @@ import {
   uniqBy,
   find,
   constant,
-  forEach
+  forEach,
 } from 'lodash';
 import { mapLimit, ensureDirExists } from './util';
 
@@ -70,6 +70,7 @@ export function checkoutAllProjects(
     addToArray(projectsByRepoId, repo.id, project);
     allReposWithDuplicates.push(repo);
   }
+
   const uniqueRepos = uniqBy(allReposWithDuplicates, repo => repo.id);
   log(`checking out ${uniqueRepos.length} repos`);
   return checkoutIntoTmp(uniqueRepos).then(pathByRepoId => {
@@ -90,9 +91,9 @@ export function checkoutAllProjects(
         return {
           [project.id]: {
             repoPath: path,
-            projectPath: makePath(path, project.path)
+            projectPath: makePath(path, project.path),
           },
-          ...acc
+          ...acc,
         };
       },
       {} as PathByProjectId

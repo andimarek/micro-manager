@@ -2,12 +2,12 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-('use strict');
+/* tslint:disable */
 
 import { isArray } from 'lodash';
 
 export const empty: IDisposable = Object.freeze({
-  dispose() {}
+  dispose() {},
 });
 
 export interface IDisposable {

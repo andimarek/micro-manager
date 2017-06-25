@@ -9,7 +9,7 @@ const command: Command = {
   arguments: [{ name: 'remoteName' }],
   execute(args: string[]) {
     return executePush(args);
-  }
+  },
 };
 
 function executePush(args: string[]): Promise<any> {

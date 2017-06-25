@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-('use strict');
+/* tslint:disable */
 
 /**
  * Represents a UUID as defined by rfc4122.
@@ -48,7 +48,7 @@ class V4UUID extends ValueUUID {
     'c',
     'd',
     'e',
-    'f'
+    'f',
   ];
 
   private static _timeHighBits = ['8', '9', 'a', 'b'];
@@ -99,7 +99,7 @@ class V4UUID extends ValueUUID {
         V4UUID._randomHex(),
         V4UUID._randomHex(),
         V4UUID._randomHex(),
-        V4UUID._randomHex()
+        V4UUID._randomHex(),
       ].join('')
     );
   }

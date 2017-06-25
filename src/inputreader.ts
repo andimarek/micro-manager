@@ -287,7 +287,7 @@ export function start(commandToExecute?: string): Promise<any> {
 }
 export function stop({
   exitCode,
-  silent
+  silent,
 }: {
   exitCode: number;
   silent: boolean;

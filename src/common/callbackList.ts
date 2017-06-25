@@ -2,8 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-('use strict');
-
+/* tslint:disable */
 import { IDisposable } from './lifecycle';
 // import { onUnexpectedError } from 'vs/base/common/errors';
 
@@ -63,7 +62,7 @@ export default class CallbackList {
       callbacks = this._callbacks.slice(0),
       contexts = this._contexts.slice(0);
 
-    for (var i = 0, len = callbacks.length; i < len; i++) {
+    for (let i = 0, len = callbacks.length; i < len; i++) {
       try {
         ret.push(callbacks[i].apply(contexts[i], args));
       } catch (e) {
@@ -78,7 +77,7 @@ export default class CallbackList {
     return !this._callbacks || this._callbacks.length === 0;
   }
 
-  public entries(): [Function, any][] {
+  public entries(): Array<[Function, any]> {
     if (!this._callbacks) {
       return [];
     }

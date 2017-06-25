@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-('use strict');
+/* tslint:disable */
 
 import URI from './uri';
 
@@ -27,7 +27,7 @@ function replacer(key: string, value: any): any {
       flags:
         ((<RegExp>value).global ? 'g' : '') +
           ((<RegExp>value).ignoreCase ? 'i' : '') +
-          ((<RegExp>value).multiline ? 'm' : '')
+          ((<RegExp>value).multiline ? 'm' : ''),
     };
   }
   return value;

@@ -12,7 +12,7 @@ const command: Command = {
   arguments: [{ name: 'dir' }],
   execute(args: string[]): Promise<CommandResult> {
     return checkoutIntoWorkspace(args[0]);
-  }
+  },
 };
 
 const maxParallel = 5;

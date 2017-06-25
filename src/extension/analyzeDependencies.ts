@@ -3,7 +3,7 @@ import {
   getRepositoryById,
   Project,
   PROJECT_TYPE_GRADLE,
-  GradleComplexType
+  GradleComplexType,
 } from '../domain';
 import {
   size,
@@ -16,7 +16,7 @@ import {
   reduce,
   map,
   filter,
-  forEach
+  forEach,
 } from 'lodash';
 import { log, Printer } from '../log';
 import { checkoutAllProjects } from '../checkout';
@@ -52,7 +52,7 @@ export function checkForDifferentVersions(): Promise<{
         ).then(configurations => {
           return {
             project,
-            configurations
+            configurations,
           };
         });
       });
@@ -63,9 +63,9 @@ export function checkForDifferentVersions(): Promise<{
     });
 }
 
-type VersionsByArtifact = {
-  [name: string]: { project: Project; artifact: Artifact }[];
-};
+interface VersionsByArtifact {
+  [name: string]: Array<{ project: Project; artifact: Artifact }>;
+}
 
 export function checkVersion(
   dependencies: ProjectAndDependencies[]
@@ -112,7 +112,7 @@ export function createInfoMessage(
       name,
       groupId: infos[0].artifact.groupId,
       artifactId: infos[0].artifact.artifactId,
-      infos
+      infos,
     };
   });
   const sorted = sortBy(array, ({ groupId }) => groupId);
@@ -138,7 +138,7 @@ export function createInfoMessage(
 
 export function getRuntimeDependencies(
   dependencies: ProjectAndDependencies[]
-): { project: Project; configurations: Configuration[] }[] {
+): Array<{ project: Project; configurations: Configuration[] }> {
   const configurations = R.lensProp('configurations');
   const isRuntimeConfig = config =>
     config.name === 'runtime' || config.name === 'runtimeOnly';

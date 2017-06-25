@@ -9,9 +9,9 @@ winston.configure({
     new winston.transports.File({
       filename: `${MicroManagerBaseDir}/micro-manager.log`,
       json: false,
-      level: 'debug'
-    })
-  ]
+      level: 'debug',
+    }),
+  ],
 });
 
 export interface Logger {

@@ -17,10 +17,12 @@
   "scripts": {
     "pretest": "tsc -p tsconfig.test.json",
     "test": "mocha out/**/*.js",
-    "build": "webpack",
-    "run": "yarn run build && node dist/mm.js",
+    "compile": "webpack",
     "clean": "rm -rf dist out",
-    "prettier": "prettier --write --single-quote 'src/**/*.ts'"
+    "prettier": "prettier --write --trailing-comma es5 --print-width 80 --single-quote 'src/**/*.ts'",
+    "tslint": "tslint -c tslint.json src/**/*.ts",
+    "run": "yarn run build && node dist/mm.js",
+    "build": "yarn run clean && yarn run tslint && yarn run compile && yarn run test"
   },
   "keywords": [
     "microservice",
@@ -58,6 +60,7 @@
     "ramda": "^0.23.0",
     "request": "^2.81.0",
     "tmp": "^0.0.31",
+    "tslint": "^5.4.3",
     "typescript": "^2.3.4",
     "webpack": "^2.3.3",
     "winston": "^2.3.1",

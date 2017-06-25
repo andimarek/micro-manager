@@ -1,0 +1,48 @@
+{
+  /*
+   * Possible values:
+   * - the name of a built-in config
+   * - the name of an NPM module which has a "main" file that exports a config object
+   * - a relative path to a JSON file
+   */
+  "extends": "tslint:latest",
+  "rules": {
+    "curly": true,
+    "quotemark": [
+      true,
+      "single",
+      "jsx-double"
+    ],
+    "no-console": [
+      false
+    ],
+    "ordered-imports": [
+      false
+    ],
+    "interface-name": [
+      false
+    ],
+    "max-line-length": [
+      false
+    ],
+    "no-angle-bracket-type-assertion": false,
+    "whitespace": [
+      false
+    ],
+    "object-literal-sort-keys": false,
+    "arrow-parens": false,
+    "trailing-comma": [
+      false
+    ],
+    "member-access": false,
+    "max-classes-per-file": [
+      false
+    ]
+  },
+  "rulesDirectory": [
+    /*
+     * A list of relative or absolute paths to directories that contain custom rules.
+     * See the Custom Rules documentation below for more details.
+     */
+  ]
+}

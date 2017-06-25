@@ -8,7 +8,7 @@ const command: Command = {
   arguments: [],
   execute(args: string[]) {
     return run(args);
-  }
+  },
 };
 
 function run(args: string[]) {
