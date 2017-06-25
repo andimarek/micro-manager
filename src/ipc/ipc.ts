@@ -6,8 +6,6 @@ import { IDisposable, Disposable, toDisposable } from '../common/lifecycle';
 import { assertDefined } from '../assert';
 import * as R from 'ramda';
 
-
-
 enum RequestType {
   Common,
   Cancel
@@ -68,9 +66,8 @@ export interface IClient {
 }
 
 export class IPCServer {
-
   private channels: { [name: string]: IChannel };
-  private activeRequests: { [id: number]: IDisposable; } | null;
+  private activeRequests: { [id: number]: IDisposable } | null;
 
   constructor(private protocol: IMessagePassingProtocol) {
     this.channels = Object.create(null);
@@ -107,29 +104,41 @@ export class IPCServer {
 
     const id = request.id;
 
-    const requestPromise = promise.then(data => {
-      this.protocol.send(<IRawResponse>{ id, data, type: ResponseType.Success });
-      delete this.activeRequests![request.id];
-    },
+    const requestPromise = promise.then(
+      data => {
+        this.protocol.send(
+          <IRawResponse>{ id, data, type: ResponseType.Success }
+        );
+        delete this.activeRequests![request.id];
+      },
       data => {
         if (data instanceof Error) {
-          this.protocol.send(<IRawResponse>{
-            id, data: {
-              message: data.message,
-              name: data.name,
-              stack: data.stack ? data.stack.split('\n') : void 0
-            }, type: ResponseType.Error
-          });
+          this.protocol.send(
+            <IRawResponse>{
+              id,
+              data: {
+                message: data.message,
+                name: data.name,
+                stack: data.stack ? data.stack.split('\n') : void 0
+              },
+              type: ResponseType.Error
+            }
+          );
         } else {
-          this.protocol.send(<IRawResponse>{ id, data, type: ResponseType.ErrorObj });
+          this.protocol.send(
+            <IRawResponse>{ id, data, type: ResponseType.ErrorObj }
+          );
         }
 
         delete this.activeRequests![request.id];
-      }, /*data => {
+      } /*data => {
 			this.protocol.send(<IRawResponse> { id, data, type: ResponseType.Progress });
-		}*/);
+		}*/
+    );
 
-    this.activeRequests![request.id] = toDisposable(/*() => requestPromise.cancel()*/);
+    this.activeRequests![
+      request.id
+    ] = toDisposable(/*() => requestPromise.cancel()*/);
   }
 
   private onCancelRequest(request: IRawRequest): void {
@@ -151,10 +160,9 @@ export class IPCServer {
 }
 
 export class IPCClient implements IClient {
-
   private state: State;
   private bufferedRequests: IRequest[] | null;
-  private handlers: { [id: number]: IHandler; };
+  private handlers: { [id: number]: IHandler };
   private lastRequestId: number;
 
   constructor(private protocol: IMessagePassingProtocol) {
@@ -230,13 +238,16 @@ export class IPCClient implements IClient {
 
       request.flush = () => {
         request.flush = null;
-        flushedRequest = this.doRequest(request).then(c, e, );
+        flushedRequest = this.doRequest(request).then(c, e);
       };
     });
   }
 
   private onMessage(response: IRawResponse): void {
-    if (this.state === State.Uninitialized && response.type === ResponseType.Initialize) {
+    if (
+      this.state === State.Uninitialized &&
+      response.type === ResponseType.Initialize
+    ) {
       this.state = State.Idle;
       this.bufferedRequests!.forEach(r => r.flush && r.flush());
       this.bufferedRequests = null;
@@ -266,31 +277,26 @@ function bufferIndexOf(buffer: Buffer, value: number, start = 0) {
 }
 
 export class Protocol implements IMessagePassingProtocol {
-
   private static _headerLen = 17;
 
-
-	private _onMessage = new Emitter<any>();
+  private _onMessage = new Emitter<any>();
   readonly onMessage: Event<any> = this._onMessage.event;
 
   constructor(private _socket: net.Socket) {
-
     let chunks: Buffer[] = [];
     let totalLength = 0;
 
     const state = {
       readHead: true,
       bodyIsJson: false,
-      bodyLen: -1,
+      bodyLen: -1
     };
 
     _socket.on('data', (data: Buffer) => {
-
       chunks.push(data);
       totalLength += data.length;
 
       while (totalLength > 0) {
-
         if (state.readHead) {
           // expecting header -> read 17bytes for header
           // information: `bodyIsJson` and `bodyLen`
@@ -304,7 +310,6 @@ export class Protocol implements IMessagePassingProtocol {
             const rest = all.slice(Protocol._headerLen);
             totalLength = rest.length;
             chunks = [rest];
-
           } else {
             break;
           }
@@ -314,7 +319,6 @@ export class Protocol implements IMessagePassingProtocol {
           // expecting body -> read bodyLen-bytes for
           // the actual message or wait for more data
           if (totalLength >= state.bodyLen) {
-
             const all = Buffer.concat(chunks);
             let message = all.toString('utf8', 0, state.bodyLen);
             if (state.bodyIsJson) {
@@ -329,7 +333,6 @@ export class Protocol implements IMessagePassingProtocol {
             state.bodyIsJson = false;
             state.bodyLen = -1;
             state.readHead = true;
-
           } else {
             break;
           }
@@ -338,10 +341,7 @@ export class Protocol implements IMessagePassingProtocol {
     });
   }
 
-
   public send(message: any): void {
-    
-
     // [bodyIsJson|bodyLen|message]
     // |^header^^^^^^^^^^^|^data^^]
 
@@ -359,7 +359,6 @@ export class Protocol implements IMessagePassingProtocol {
   }
 
   private _writeBuffer = new class {
-
     private _data: Buffer[] = [];
     private _totalLength = 0;
 
@@ -376,7 +375,7 @@ export class Protocol implements IMessagePassingProtocol {
       this._totalLength = 0;
       return ret;
     }
-  };
+  }();
 
   private _writeSoon(header: Buffer, data: Buffer): void {
     if (this._writeBuffer.add(header, data)) {
@@ -397,7 +396,6 @@ export class Protocol implements IMessagePassingProtocol {
 }
 
 export class Server implements IServer, IDisposable {
-
   private channels: { [name: string]: IChannel } | null;
   private server: net.Server | null;
 
@@ -407,8 +405,9 @@ export class Server implements IServer, IDisposable {
     this.server.on('connection', (socket: net.Socket) => {
       const ipcServer = new IPCServer(new Protocol(socket));
 
-      Object.keys(this.channels)
-        .forEach(name => ipcServer.registerChannel(name, this.channels![name]));
+      Object.keys(this.channels).forEach(name =>
+        ipcServer.registerChannel(name, this.channels![name])
+      );
 
       socket.once('close', () => ipcServer.dispose());
     });
@@ -428,7 +427,6 @@ export class Server implements IServer, IDisposable {
 }
 
 export class Client implements IClient, IDisposable {
-
   private ipcClient: IPCClient | null;
   private socket: net.Socket | null;
 

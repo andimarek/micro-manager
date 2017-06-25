@@ -3,18 +3,23 @@ import { createServer, Server } from 'net';
 import { generateUuid } from '../common/uuid';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { IMessagePassingProtocol, Protocol } from "../ipc/ipc";
-import { createProxyProtocol } from "../ipc/ipcRemoteCom";
-import { ThreadService } from "../ipc/abstractThreadService";
-import { MainThreadTasksShape, TaskDescription, MainContext, TaskHostContext, TaskThreadTasksShape } from "./extensionHostProtocol";
-import { createMainContextProxyIdentifier } from "../ipc/threadService";
+import { IMessagePassingProtocol, Protocol } from '../ipc/ipc';
+import { createProxyProtocol } from '../ipc/ipcRemoteCom';
+import { ThreadService } from '../ipc/abstractThreadService';
+import {
+  MainThreadTasksShape,
+  TaskDescription,
+  MainContext,
+  TaskHostContext,
+  TaskThreadTasksShape
+} from './extensionHostProtocol';
+import { createMainContextProxyIdentifier } from '../ipc/threadService';
 import { log } from '../log';
-import { Command, CommandResult, addCommand } from "../inputreader";
+import { Command, CommandResult, addCommand } from '../inputreader';
 import { getRepositoryByProjectName } from '../domain';
-import { newTmpFile, makePath, removeLastPathSegment } from "../util";
+import { newTmpFile, makePath, removeLastPathSegment } from '../util';
 import { get } from 'request';
-import { createWriteStream } from 'fs'
-
+import { createWriteStream } from 'fs';
 
 export let threadService: ThreadService;
 let taskHostThreads: TaskThreadTasksShape;
@@ -41,9 +46,8 @@ function tryListenOnPipe(): Promise<[Server, string]> {
   });
 }
 
-const logPrefix = "[ExtHost] ";
+const logPrefix = '[ExtHost] ';
 class MainThreadTasks implements MainThreadTasksShape {
-
   $getRepoForProject(projectName: string): Promise<Repository | undefined> {
     const repo = getRepositoryByProjectName(projectName);
     log.debug('get repo for project ', projectName, ' with result: ', repo);
@@ -67,7 +71,9 @@ class MainThreadTasks implements MainThreadTasksShape {
       name: taskDesc.name,
       arguments: commandArgs,
       execute(args: string[]): Promise<CommandResult> {
-        return taskHostThreads.$executeTask(taskDesc.name, args).then(() => ({ success: true }));
+        return taskHostThreads
+          .$executeTask(taskDesc.name, args)
+          .then(() => ({ success: true }));
       }
     };
     addCommand(command);
@@ -75,7 +81,10 @@ class MainThreadTasks implements MainThreadTasksShape {
 }
 
 export function startExtHostProcess(): Promise<any> {
-  const extensionHostFile = makePath(removeLastPathSegment(eval('__filename')), 'extensionHost');
+  const extensionHostFile = makePath(
+    removeLastPathSegment(eval('__filename')),
+    'extensionHost'
+  );
   return tryListenOnPipe().then(([server, hook]) => {
     const childProcess = fork(extensionHostFile, [hook]);
 
@@ -86,7 +95,6 @@ export function startExtHostProcess(): Promise<any> {
         const protocol = new Protocol(socket);
         resolve(protocol);
       });
-
     }).then(protocol => {
       return new Promise<any>((resolve, reject) => {
         protocol.onMessage(msg => {
@@ -99,8 +107,13 @@ export function startExtHostProcess(): Promise<any> {
             log.debug('task host is initialized');
             const remoteCom = createProxyProtocol(protocol);
             threadService = new ThreadService(remoteCom, true);
-            threadService.set(MainContext.MainThreadTasks, new MainThreadTasks());
-            taskHostThreads = threadService.get(TaskHostContext.TaskThreadTasks);
+            threadService.set(
+              MainContext.MainThreadTasks,
+              new MainThreadTasks()
+            );
+            taskHostThreads = threadService.get(
+              TaskHostContext.TaskThreadTasks
+            );
             log('extension host process started');
             resolve();
           }
@@ -116,7 +129,7 @@ export function loadExtensionFile(path: string): Promise<any> {
   if (path.startsWith('http')) {
     const tmpFile = newTmpFile();
     return new Promise<void>((resolve, reject) => {
-      get(path, function (error, response, body) {
+      get(path, function(error, response, body) {
         if (error) {
           reject(error);
         }

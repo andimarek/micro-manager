@@ -1,9 +1,8 @@
-import {log} from './log';
+import { log } from './log';
 import { parseString } from 'xml2js';
 import * as fs from 'fs';
 import { forEach } from 'lodash';
-import {Project} from './domain';
-
+import { Project } from './domain';
 
 function parsePomXml(file: string) {
   // const pomFile = <string>fs.readFileSync('./test/example-service/pom2.xml', 'utf-8');
@@ -12,8 +11,6 @@ function parsePomXml(file: string) {
     const json = JSON.stringify(result);
     const dependencies = result.project.dependencies[0].dependency;
 
-    forEach(dependencies, (dep, key) => {
-    });
+    forEach(dependencies, (dep, key) => {});
   });
-
 }

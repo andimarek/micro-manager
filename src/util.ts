@@ -6,34 +6,41 @@ import { log } from './log';
 import { mapLimit as asyncMapLimit } from 'async';
 import { inspect as nodeInspect } from 'util';
 
-
 export function inspect(toPrint: any): string {
   return nodeInspect(toPrint, { depth: undefined });
 }
 
-export interface Dictionary<T> { [key: string]: T; }
-export interface AsyncIterator<T, R> { (item: T): Promise<R>; }
+export interface Dictionary<T> { [key: string]: T }
+export interface AsyncIterator<T, R> { (item: T): Promise<R> }
 
-export function mapLimit<T, R>(arr: Iterable<T> | Dictionary<T>, limit: number, iterator: AsyncIterator<T, R>): Promise<(R)[]> {
+export function mapLimit<T, R>(
+  arr: Iterable<T> | Dictionary<T>,
+  limit: number,
+  iterator: AsyncIterator<T, R>
+): Promise<(R)[]> {
   return new Promise<(R | undefined)[]>((resolve, reject) => {
-    asyncMapLimit<T, R, any>(<any>arr, limit, (item: T, callback) => {
-      iterator(item)
-        .then((result) => callback(null, result))
-        .catch((error) => callback(error));
-    }, (error, result) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(result);
+    asyncMapLimit<T, R, any>(
+      <any>arr,
+      limit,
+      (item: T, callback) => {
+        iterator(item)
+          .then(result => callback(null, result))
+          .catch(error => callback(error));
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
       }
-    });
+    );
   });
 }
 
 export function firstElement<T>(set: Set<T>): T {
   return set.values().next().value;
 }
-
 
 export function sleep(seconds: number): void {
   execSync(`sleep ${seconds}`);
@@ -46,7 +53,11 @@ export function newTmpDir(): string {
 export function newTmpFile(): string {
   return fileSync().name;
 }
-export function addToArray<T>(collection: { [key: string]: T[] }, key: string, value: T): void {
+export function addToArray<T>(
+  collection: { [key: string]: T[] },
+  key: string,
+  value: T
+): void {
   if (collection[key]) {
     collection[key].push(value);
   } else {
@@ -78,20 +89,24 @@ export function makePath(part1: string, part2: string, part3?: string): string {
 }
 
 export function fileExists(path: string): Promise<boolean> {
-  return new Promise((resolve) => {
-    fs.exists(path, (exists) => {
+  return new Promise(resolve => {
+    fs.exists(path, exists => {
       resolve(exists);
     });
   });
 }
 
 export function assertFileExists(path: string): Promise<void> {
-  return fileExists(path).then((exists) => {
+  return fileExists(path).then(exists => {
     assertTrue(exists, `file ${path} doesn't exist`);
   });
 }
 
-export function executeCommand(command: string, args: string[], path: string): Promise<string> {
+export function executeCommand(
+  command: string,
+  args: string[],
+  path: string
+): Promise<string> {
   log.debug(`execute command ${command} ${args} in path ${path}`);
   const result = new Promise((resolve, reject) => {
     execFile(command, args, { cwd: path }, (error, stdout, stderr) => {
@@ -105,7 +120,10 @@ export function executeCommand(command: string, args: string[], path: string): P
   return result;
 }
 
-export function executeCommandInShell(command: string, path: string): Promise<string> {
+export function executeCommandInShell(
+  command: string,
+  path: string
+): Promise<string> {
   const result = new Promise((resolve, reject) => {
     exec(command, { cwd: path }, (error, stdout, stderr) => {
       if (error) {
@@ -118,12 +136,10 @@ export function executeCommandInShell(command: string, path: string): Promise<st
   return result;
 }
 
-
 export function ensureDirExists(path: string): Promise<any> {
-
   function handleAccessError(error, resolve, reject) {
     if (error && error.code === 'ENOENT') {
-      fs.mkdir(path, (mkdirError) => {
+      fs.mkdir(path, mkdirError => {
         if (mkdirError) {
           reject(mkdirError);
         } else {
@@ -150,7 +166,7 @@ export function ensureDirExists(path: string): Promise<any> {
   }
 
   const result = new Promise<any>((resolve, reject) => {
-    fs.access(path, fs.constants.W_OK | fs.constants.R_OK, (error) => {
+    fs.access(path, fs.constants.W_OK | fs.constants.R_OK, error => {
       if (error) {
         handleAccessError(error, resolve, reject);
       } else {
@@ -161,10 +177,9 @@ export function ensureDirExists(path: string): Promise<any> {
   return result;
 }
 
-
 export function readFile(path: string, defaultContent: any): Promise<any> {
   const result = new Promise<object>((resolve, reject) => {
-    const fd = fs.access(path, fs.constants.R_OK | fs.constants.W_OK, (err) => {
+    const fd = fs.access(path, fs.constants.R_OK | fs.constants.W_OK, err => {
       if (err && err.code === 'ENOENT') {
         fs.writeFileSync(path, JSON.stringify(defaultContent));
         resolve(defaultContent);
@@ -188,7 +203,7 @@ export function readFile(path: string, defaultContent: any): Promise<any> {
 
 export function writeFile(filePath: string, content: any): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    fs.writeFile(filePath, JSON.stringify(content), (error) => {
+    fs.writeFile(filePath, JSON.stringify(content), error => {
       if (error) {
         reject(error);
       } else {

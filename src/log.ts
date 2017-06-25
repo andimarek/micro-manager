@@ -6,7 +6,7 @@ import { MicroManagerBaseDir } from './constants';
 
 winston.configure({
   transports: [
-    new (winston.transports.File)({
+    new winston.transports.File({
       filename: `${MicroManagerBaseDir}/micro-manager.log`,
       json: false,
       level: 'debug'
@@ -20,7 +20,6 @@ export interface Logger {
   success(message, ...optional: any[]): void;
   debug(message, ...optional: any[]): void;
 }
-
 
 function defaultLog(message: string, ...optional: any[]) {
   console.log.apply(null, [message].concat(optional));
@@ -46,7 +45,9 @@ function toString(message: string, ...optional: any[]): string {
   if (optional.length === 0) {
     return message;
   }
-  const optionalParts = map(optional, (toPrint) => inspect(toPrint, { depth: undefined }));
+  const optionalParts = map(optional, toPrint =>
+    inspect(toPrint, { depth: undefined })
+  );
   const result = message + optionalParts.join();
   return result;
 }
@@ -59,11 +60,12 @@ export class Printer {
       this.value += '\n';
       return;
     }
-    const optionalPrints = map(optional, (toPrint) => inspect(toPrint, { depth: undefined }));
+    const optionalPrints = map(optional, toPrint =>
+      inspect(toPrint, { depth: undefined })
+    );
     this.value += message + optionalPrints.join() + '\n';
   }
 }
-
 
 const log: Logger = <Logger>defaultLog;
 log.error = logError;

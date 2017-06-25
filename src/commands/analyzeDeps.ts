@@ -8,8 +8,7 @@ import { Command, CommandResult } from '../inputreader';
 
 const command: Command = {
   name: 'analyzeDeps',
-  arguments: [
-  ],
+  arguments: [],
   execute(args: string[]) {
     return analyze();
   }

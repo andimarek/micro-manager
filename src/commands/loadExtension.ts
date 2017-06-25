@@ -5,12 +5,9 @@ import { find } from 'lodash';
 import { log } from '../log';
 import { loadExtensionFile } from '../extension/extensionHostManager';
 
-
 const command: Command = {
   name: 'load-extension',
-  arguments: [
-    { name: 'path' }
-  ],
+  arguments: [{ name: 'path' }],
   execute(args: string[]) {
     return execute(args);
   }
@@ -23,9 +20,9 @@ function execute(args: string[]): Promise<CommandResult> {
       log.debug('load extension successful');
       return { success: true };
     })
-    .catch((error) => {
+    .catch(error => {
       log.debug('load extension failed', error);
-      return { success: false, output: error }
+      return { success: false, output: error };
     });
 }
 

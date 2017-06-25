@@ -1,4 +1,15 @@
-import { isUndefined, includes, pickBy, size, forEach, find, uniqBy, reduce, groupBy, filter } from 'lodash';
+import {
+  isUndefined,
+  includes,
+  pickBy,
+  size,
+  forEach,
+  find,
+  uniqBy,
+  reduce,
+  groupBy,
+  filter
+} from 'lodash';
 import { log } from './log';
 import * as fs from 'fs';
 import { ensureDirExists, readFile, writeFile, sleep } from './util';
@@ -29,8 +40,8 @@ const PROJECT_TYPES = [PROJECT_TYPE_GRADLE, PROJECT_TYPE_MAVEN];
 
 export interface GradleComplexType {
   name: 'gradle' | 'maven';
-  'gradlew-path': string
-};
+  'gradlew-path': string;
+}
 export type ProjectType = string | GradleComplexType;
 
 export interface Product {
@@ -53,12 +64,10 @@ export interface Data {
   projects: Project[];
 }
 
-
 /**
  * 
  * 
  */
-
 
 const dataDir = `${MicroManagerBaseDir}/data`;
 const dataFileName = 'data.json';
@@ -75,16 +84,21 @@ export function getDataDir() {
 }
 
 export async function refreshData() {
-  data = <Data>await readFile(dataFileFullPath, { repos: [], projects: [] } as Data);
+  data = <Data>await readFile(
+    dataFileFullPath,
+    { repos: [], projects: [] } as Data
+  );
   log.debug('refreshed data:', data);
 }
 
 export async function init(): Promise<any> {
-
   await ensureDirExists(MicroManagerBaseDir);
-  await ensureDirExists(dataDir)
+  await ensureDirExists(dataDir);
 
-  data = <Data>await readFile(dataFileFullPath, { repos: [], projects: [] } as Data);
+  data = <Data>await readFile(
+    dataFileFullPath,
+    { repos: [], projects: [] } as Data
+  );
   log.debug('data:', data);
   validateData();
   await ensureGitRepo(dataDir);
@@ -101,9 +115,14 @@ function validateData() {
 }
 
 function validateRepoReferences() {
-  const invalidReferences = filter(data.projects, (project) => getRepositoryById(project.repositoryId) === undefined);
+  const invalidReferences = filter(
+    data.projects,
+    project => getRepositoryById(project.repositoryId) === undefined
+  );
   if (invalidReferences.length > 0) {
-    log.error(`invalid projects: the repositoryId is not valid for the following projects`);
+    log.error(
+      `invalid projects: the repositoryId is not valid for the following projects`
+    );
     log.error(`invalid projects:`, invalidReferences);
     throw new Error('invalid data');
   }
@@ -122,7 +141,7 @@ function validateRepos() {
 }
 
 function validProjectTypes() {
-  const invalidProjects = filter(data.projects, (project) => {
+  const invalidProjects = filter(data.projects, project => {
     if (includes(PROJECT_TYPES, project.type)) {
       return false;
     }
@@ -138,11 +157,13 @@ function validProjectTypes() {
     log.error(`invalid project types:`, invalidProjects);
     throw new Error('invalid projects');
   }
-
 }
 
 function validateRepoTypes() {
-  const invalidRepos = filter(data.repos, (repo) => !includes(REPO_TYPES, repo.type));
+  const invalidRepos = filter(
+    data.repos,
+    repo => !includes(REPO_TYPES, repo.type)
+  );
   if (invalidRepos.length > 0) {
     log.error(`invalid repo types:`, invalidRepos);
     log.error(`allowed repo types:`, REPO_TYPES);
@@ -153,7 +174,7 @@ function validateRepoTypes() {
 function getDuplicates<T>(data: T[], propName: string): { [key: string]: T[] } {
   type ById = { [key: string]: T[] };
   const byId = <ById>groupBy(data, propName);
-  const duplicates = <ById>pickBy(byId, (elements) => elements.length > 1);
+  const duplicates = <ById>pickBy(byId, elements => elements.length > 1);
   return duplicates;
 }
 
@@ -204,22 +225,22 @@ function checkForDuplicateProjectIds() {
   }
 }
 
-
 function checkForUniqueIds(array: { id: string }[]): boolean {
   return uniqBy(array, 'id').length !== array.length;
 }
-
 
 export function getRepos(): Repository[] {
   return data.repos;
 }
 
 export function getRepositoryById(id: string): Repository | undefined {
-  return find(data.repos, (repo) => repo.id === id);
+  return find(data.repos, repo => repo.id === id);
 }
 
-export function getRepositoryByProjectName(projectName: string): Repository | undefined {
-  const project = find(data.projects, (project) => project.name === projectName);
+export function getRepositoryByProjectName(
+  projectName: string
+): Repository | undefined {
+  const project = find(data.projects, project => project.name === projectName);
   if (!project) {
     return undefined;
   }
@@ -235,8 +256,9 @@ export function getRepositoryByIdSafe(id: string): Repository {
 export function setData(_data: Data): Promise<void> {
   log.debug(`setting new data`, data);
   data = _data;
-  return writeFile(dataFileFullPath, data)
-    .then(() => ensureFileIsCommited(dataDir, dataFileName));
+  return writeFile(dataFileFullPath, data).then(() =>
+    ensureFileIsCommited(dataDir, dataFileName)
+  );
 }
 export function getData(): Data {
   return data;
@@ -248,10 +270,9 @@ export function mergeData(otherData: Data): Data | null {
   const result: Data = {
     repos: newRepos,
     projects: newProjects
-  }
+  };
   return result;
 }
-
 
 function mergeRepos(repos1: Repository[], repos2: Repository[]): Repository[] {
   const result: Repository[] = repos1.slice();
@@ -262,7 +283,9 @@ function mergeRepos(repos1: Repository[], repos2: Repository[]): Repository[] {
     } else {
       if (!areReposEqual(repo, otherRepo)) {
         log.error(`cant merge repos. different repos:`, repo, otherRepo);
-        throw new Error(`can't merge repos. different repos with id ${repo.id}`);
+        throw new Error(
+          `can't merge repos. different repos with id ${repo.id}`
+        );
       }
     }
   }
@@ -270,9 +293,11 @@ function mergeRepos(repos1: Repository[], repos2: Repository[]): Repository[] {
 }
 
 function areReposEqual(repo1: Repository, repo2: Repository): boolean {
-  return repo1.id === repo2.id &&
+  return (
+    repo1.id === repo2.id &&
     repo1.url === repo2.url &&
-    repo2.type === repo2.type;
+    repo2.type === repo2.type
+  );
 }
 
 function mergeProjects(projects1: Project[], projects2: Project[]): Project[] {
@@ -284,7 +309,9 @@ function mergeProjects(projects1: Project[], projects2: Project[]): Project[] {
     } else {
       if (!areProjectsEqual(proj, otherProj)) {
         log.error(`cant merge projects. different projects:`, proj, otherProj);
-        throw new Error(`can't merge projects. different projects with id ${proj.id}`);
+        throw new Error(
+          `can't merge projects. different projects with id ${proj.id}`
+        );
       }
     }
   }
@@ -292,10 +319,12 @@ function mergeProjects(projects1: Project[], projects2: Project[]): Project[] {
 }
 
 function areProjectsEqual(proj1: Project, proj2: Project): boolean {
-  return proj1.id === proj2.id &&
+  return (
+    proj1.id === proj2.id &&
     proj1.name === proj2.name &&
     proj1.path === proj2.path &&
-    proj1.type === proj2.type;
+    proj1.type === proj2.type
+  );
 }
 
 export function getConfig(): Config {

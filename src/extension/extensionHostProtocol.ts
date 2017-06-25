@@ -1,4 +1,7 @@
-import { createMainContextProxyIdentifier, createTaskHostContextProxyIdentifier } from '../ipc/threadService'
+import {
+  createMainContextProxyIdentifier,
+  createTaskHostContextProxyIdentifier
+} from '../ipc/threadService';
 
 export interface TaskDescription {
   name: string;
@@ -6,22 +9,42 @@ export interface TaskDescription {
 }
 
 export abstract class MainThreadTasksShape {
-  $registerTask(taskDesc: TaskDescription): void { throw new Error('not implemented'); }
-  $getRepoForProject(projectName: string): Promise<Repository | undefined> {throw new Error('not implemented') };
-  $log(message:string, ...optional: any[]): void { throw new Error('not implemented'); }
-  $logError(message:string, ...optional: any[]): void { throw new Error('not implemented'); };
-  $logDebug(message:string, ...optional: any[]): void { throw new Error('not implemented'); };
+  $registerTask(taskDesc: TaskDescription): void {
+    throw new Error('not implemented');
+  }
+  $getRepoForProject(projectName: string): Promise<Repository | undefined> {
+    throw new Error('not implemented');
+  }
+  $log(message: string, ...optional: any[]): void {
+    throw new Error('not implemented');
+  }
+  $logError(message: string, ...optional: any[]): void {
+    throw new Error('not implemented');
+  }
+  $logDebug(message: string, ...optional: any[]): void {
+    throw new Error('not implemented');
+  }
 }
 
 export abstract class TaskThreadTasksShape {
-  $loadTaskFile(path: string): Promise<void> { throw new Error('not implemented'); }
-  $executeTask(name: string, args: any[]): Promise<any> { throw new Error('not implemented'); }
+  $loadTaskFile(path: string): Promise<void> {
+    throw new Error('not implemented');
+  }
+  $executeTask(name: string, args: any[]): Promise<any> {
+    throw new Error('not implemented');
+  }
 }
 
 export const MainContext = {
-  MainThreadTasks: createMainContextProxyIdentifier<MainThreadTasksShape>('MainThreadTasks', MainThreadTasksShape)
-}
+  MainThreadTasks: createMainContextProxyIdentifier<MainThreadTasksShape>(
+    'MainThreadTasks',
+    MainThreadTasksShape
+  )
+};
 
 export const TaskHostContext = {
-  TaskThreadTasks: createTaskHostContextProxyIdentifier<TaskThreadTasksShape>('TashThreadTasks', TaskThreadTasksShape)
-}
+  TaskThreadTasks: createTaskHostContextProxyIdentifier<TaskThreadTasksShape>(
+    'TashThreadTasks',
+    TaskThreadTasksShape
+  )
+};

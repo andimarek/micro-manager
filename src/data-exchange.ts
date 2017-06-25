@@ -11,7 +11,6 @@ const PULL_COMMAND = 'PULL_COMMAND';
 const ENCODING = 'utf-8';
 const DEFAULT_CHANNEL = 'DEFAULT_CHANNEL';
 
-
 export function openServer(): Promise<any> {
   log(`opening server at port ${DEFAULT_PORT}`);
   const channel = {
@@ -19,7 +18,7 @@ export function openServer(): Promise<any> {
       log(`received command ${command}`);
       switch (command) {
         case PUSH_COMMAND:
-          return handlePush(<Data>arg).then( () => true, () => false);
+          return handlePush(<Data>arg).then(() => true, () => false);
         case PULL_COMMAND:
           return Promise.resolve(handlePull());
         default:
@@ -31,7 +30,7 @@ export function openServer(): Promise<any> {
     .then((server: Server) => {
       server.registerChannel(DEFAULT_CHANNEL, channel);
     })
-    .catch((reason) => {
+    .catch(reason => {
       if (reason.code === 'EADDRINUSE') {
         log.error('could not open server: port is used');
       } else {
@@ -56,7 +55,6 @@ function handlePull(): Data {
   return getData();
 }
 
-
 export function push(host: string): Promise<any> {
   log.debug(`pushing data with ${host}`);
   return connect(DEFAULT_PORT)
@@ -67,7 +65,7 @@ export function push(host: string): Promise<any> {
       callResult.then(() => client.dispose(), () => client.dispose());
       return callResult;
     })
-    .then((result:boolean) => {
+    .then((result: boolean) => {
       if (result) {
         log.success('push successful');
       } else {
@@ -87,7 +85,7 @@ export function pull(host: string): Promise<any> {
       callResult.then(client.dispose, client.dispose);
       return callResult;
     })
-    .then((otherData:Data) => {
+    .then((otherData: Data) => {
       log('result of pull:', otherData);
       const mergedData = mergeData(otherData);
       if (mergedData) {
@@ -98,6 +96,3 @@ export function pull(host: string): Promise<any> {
       }
     });
 }
-
-
-

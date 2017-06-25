@@ -5,8 +5,7 @@ import { log } from '../log';
 
 const command: Command = {
   name: 'config',
-  arguments: [
-  ],
+  arguments: [],
   execute(args: string[]) {
     return run(args);
   }

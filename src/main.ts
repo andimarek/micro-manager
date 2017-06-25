@@ -1,4 +1,8 @@
-import { setCommands, Command, start as startReadingInput } from './inputreader';
+import {
+  setCommands,
+  Command,
+  start as startReadingInput
+} from './inputreader';
 import { init as initDomain, getRepos, Repository, getConfig } from './domain';
 import { openServer } from './data-exchange';
 import { log } from './log';
@@ -15,8 +19,7 @@ import remoteCommands from './commands/remote';
 import loadExtension from './commands/loadExtension';
 import { startExtHostProcess } from './extension/extensionHostManager';
 
-
-process.on('uncaughtException', (exception) => {
+process.on('uncaughtException', exception => {
   log.error(`uncaught exception ${exception} ... exiting now`, exception);
   process.exit(1);
 });
@@ -28,10 +31,10 @@ process.on('unhandledRejection', (reason, p) => {
 
 log('starting micro-manager 😄');
 
-program.version('0.0.1')
+program
+  .version('0.0.1')
   .option('-e, --execute <command>', 'execute the command and exit')
   .parse(process.argv);
-
 
 const commands: Command[] = [
   checkout,
@@ -49,4 +52,4 @@ setCommands(commands);
 initDomain()
   // .then(openServer)
   .then(() => startExtHostProcess())
-  .then(() => startReadingInput(program.execute))
+  .then(() => startReadingInput(program.execute));
